@@ -9,7 +9,6 @@ namespace DungeonSlime;
 
 public class Game1 : Core
 {
-    // Background theme song.
     private Song _themeSong;
 
     public Game1() : base("Dungeon Slime", 1280, 720, false)

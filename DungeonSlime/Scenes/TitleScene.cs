@@ -21,7 +21,6 @@ public class TitleScene : Scene
     private const string SLIME_TEXT = "Slime";
     private const string PRESS_ENTER_TEXT = "Press Enter To Start";
 
-    // The font to use to render normal text.
     private SpriteFont _font;
 
     // The font used to render the title text.

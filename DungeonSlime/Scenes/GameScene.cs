@@ -43,7 +43,6 @@ public class GameScene : Scene
     private GameState _state;
 
     // The grayscale shader effect.
-    private Effect _grayscaleEffect;
 
     // The amount of saturation to provide the grayscale shader effect.
     private float _saturation = 1.0f;
@@ -51,7 +50,8 @@ public class GameScene : Scene
     // The speed of the fade to grayscale effect.
     private const float FADE_SPEED = 0.08f;
 
-    Effect collisionEffect;
+    Effect combinedEffect;
+
     Circle batBounds;
     public override void Initialize()
     {
@@ -172,9 +172,7 @@ public class GameScene : Scene
         _collectSoundEffect = Content.Load<SoundEffect>("audio/collect");
 
         // Load the grayscale effect.
-        _grayscaleEffect = Content.Load<Effect>("effects/grayscaleEffect");
-
-        collisionEffect = Content.Load<Effect>("CollisionHighlight");
+        combinedEffect = Content.Load<Effect>("CombinedPost");
     }
 
 
@@ -408,47 +406,54 @@ public class GameScene : Scene
 
     public override void Draw(GameTime gameTime)
     {
+        Circle[] colliders = new Circle[]{ _bat.GetBounds(), _slime.GetBounds(), new Circle(200, 200, 100)};
+        int count = Math.Min(colliders.Length, 64);
+        Vector2[] centers = new Vector2[count];
+        float[] radii = new float[count];
+
+        for (int i = 0; i < count; i++)
+        {
+            var c = colliders[i];
+            centers[i] = new Vector2(c.X, c.Y);
+            radii[i] = c.Radius;
+        }
+
+        // 1) Render scene into sceneTarget
         Core.GraphicsDevice.SetRenderTarget(Core.SceneTarget);
-        // Clear the back buffer.
         Core.GraphicsDevice.Clear(Color.CornflowerBlue);
 
-        // We are in a game over state, so apply the saturation parameter.
-        _grayscaleEffect.Parameters["Saturation"].SetValue(_saturation);
-
-        // And begin the sprite batch using the grayscale effect.
-        Core.SpriteBatch.Begin(samplerState: SamplerState.PointClamp, effect: _grayscaleEffect);
-
-        // Draw the tilemapgitg
+        Core.SpriteBatch.Begin(SpriteSortMode.Deferred, samplerState: SamplerState.PointClamp);
         _tilemap.Draw(Core.SpriteBatch);
-
-        // Draw the slime.
         _slime.Draw();
-
-        // Draw the bat.
         _bat.Draw();
-
-        // Always end the sprite batch when finished.
         Core.SpriteBatch.End();
 
+        // 2) Back to backbuffer
         Core.GraphicsDevice.SetRenderTarget(null);
 
-        // --- 3) Передаём параметры шейдеру ---
-        collisionEffect.Parameters["Texture0"].SetValue(Core.SceneTarget); // важное: texture вход
-        collisionEffect.Parameters["ScreenSize"].SetValue(new Vector2(Core.GraphicsDevice.Viewport.Width, Core.GraphicsDevice.Viewport.Height));
+        // 3) Set parameters for combined effect
+        combinedEffect.Parameters["Texture0"].SetValue(Core.SceneTarget);
+        combinedEffect.Parameters["ScreenSize"].SetValue(new Vector2(Core.GraphicsDevice.Viewport.Width, Core.GraphicsDevice.Viewport.Height));
+        combinedEffect.Parameters["Saturation"].SetValue(1 - _saturation);
 
-        collisionEffect.Parameters["CircleCenter"].SetValue(new Vector2(_bat.GetBounds().X, _bat.GetBounds().Y));
-        collisionEffect.Parameters["CircleRadius"].SetValue(_bat.GetBounds().Radius * 2);
-        collisionEffect.Parameters["HighlightColor"].SetValue(new Vector4(0.8f, 0.0f, 0.0f, 0.6f)); // зелёный, a=0.6
-        collisionEffect.Parameters["ShowCollision"].SetValue(true);
+        // Collision params
+        var bounds = _bat.GetBounds();
+        combinedEffect.Parameters["CircleCenters"].SetValue(centers);
+        combinedEffect.Parameters["CircleRadii"].SetValue(radii);
+        combinedEffect.Parameters["CircleCount"].SetValue(count);
+        combinedEffect.Parameters["HighlightColor"].SetValue(new Vector4(0.9f, 0f, 0f, 0.5f));
+        combinedEffect.Parameters["ShowCollision"].SetValue(true);
+        combinedEffect.Parameters["OutlineThickness"].SetValue(10f);
+        combinedEffect.Parameters["OutlineSoftness"].SetValue(0.25f);
 
-        // --- 4) Рисуем fullscreen quad с effect: он читает sceneTarget и накладывает подсветку ---
-        Core.SpriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, null, null, null, collisionEffect);
+        Core.SpriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, null, null, null, combinedEffect);
         Core.SpriteBatch.Draw(Core.SceneTarget, new Rectangle(0, 0, Core.GraphicsDevice.Viewport.Width, Core.GraphicsDevice.Viewport.Height), Color.White);
         Core.SpriteBatch.End();
 
-        // Draw the UI.
+        // 5) Draw UI on top
         _ui.Draw();
     }
+
 
 
 }

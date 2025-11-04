@@ -37,17 +37,11 @@
 /processorParam:Quality=Best
 /build:audio/ui.wav
 
-#begin CollisionHighlight.fx
+#begin CombinedPost.fx
 /importer:EffectImporter
 /processor:EffectProcessor
 /processorParam:DebugMode=Auto
-/build:CollisionHighlight.fx
-
-#begin effects/grayscaleEffect.fx
-/importer:EffectImporter
-/processor:EffectProcessor
-/processorParam:DebugMode=Auto
-/build:effects/grayscaleEffect.fx
+/build:CombinedPost.fx
 
 #begin fonts/04B_30_5x.spritefont
 /importer:FontDescriptionImporter

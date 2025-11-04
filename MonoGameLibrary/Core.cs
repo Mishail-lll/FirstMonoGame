@@ -34,6 +34,8 @@ public class Core : Game
     /// </summary>
     public static new GraphicsDevice GraphicsDevice { get; private set; }
 
+    public static RenderTarget2D SceneTarget;
+
     /// <summary>
     /// Gets the sprite batch used for all 2D rendering.
     /// </summary>
@@ -121,6 +123,14 @@ public class Core : Game
 
         // Create a new audio controller.
         Audio = new AudioController();
+
+        SceneTarget = new RenderTarget2D(
+                GraphicsDevice,
+                GraphicsDevice.Viewport.Width,
+                GraphicsDevice.Viewport.Height,
+                false,
+                GraphicsDevice.PresentationParameters.BackBufferFormat,
+                DepthFormat.None, 0, RenderTargetUsage.DiscardContents);
     }
 
     protected override void UnloadContent()

@@ -51,6 +51,8 @@ public class GameScene : Scene
     // The speed of the fade to grayscale effect.
     private const float FADE_SPEED = 0.08f;
 
+    Effect collisionEffect;
+    Circle batBounds;
     public override void Initialize()
     {
         // LoadContent is called during base.Initialize().
@@ -80,6 +82,8 @@ public class GameScene : Scene
 
         // Initialize a new game to be played.
         InitializeNewGame();
+
+
     }
 
     private void InitializeUI()
@@ -169,6 +173,8 @@ public class GameScene : Scene
 
         // Load the grayscale effect.
         _grayscaleEffect = Content.Load<Effect>("effects/grayscaleEffect");
+
+        collisionEffect = Content.Load<Effect>("CollisionHighlight");
     }
 
 
@@ -188,6 +194,10 @@ public class GameScene : Scene
             {
                 return;
             }
+        }
+        else
+        {
+            _saturation = 1.0f;
         }
 
         // If the pause button is pressed, toggle the pause state.
@@ -294,7 +304,7 @@ public class GameScene : Scene
         Vector2 centerToSlime = slimeCenter - roomCenter;
 
         // Get the bounds of the bat.
-        Circle batBounds = _bat.GetBounds();
+        batBounds = _bat.GetBounds();
 
         // Calculate the amount of padding we will add to the new position of
         // the bat to ensure it is not sticking to walls
@@ -398,24 +408,17 @@ public class GameScene : Scene
 
     public override void Draw(GameTime gameTime)
     {
+        Core.GraphicsDevice.SetRenderTarget(Core.SceneTarget);
         // Clear the back buffer.
         Core.GraphicsDevice.Clear(Color.CornflowerBlue);
 
-        if (_state != GameState.Playing)
-        {
-            // We are in a game over state, so apply the saturation parameter.
-            _grayscaleEffect.Parameters["Saturation"].SetValue(_saturation);
+        // We are in a game over state, so apply the saturation parameter.
+        _grayscaleEffect.Parameters["Saturation"].SetValue(_saturation);
 
-            // And begin the sprite batch using the grayscale effect.
-            Core.SpriteBatch.Begin(samplerState: SamplerState.PointClamp, effect: _grayscaleEffect);
-        }
-        else
-        {
-            // Otherwise, just begin the sprite batch as normal.
-            Core.SpriteBatch.Begin(samplerState: SamplerState.PointClamp);
-        }
+        // And begin the sprite batch using the grayscale effect.
+        Core.SpriteBatch.Begin(samplerState: SamplerState.PointClamp, effect: _grayscaleEffect);
 
-        // Draw the tilemap
+        // Draw the tilemapgitg
         _tilemap.Draw(Core.SpriteBatch);
 
         // Draw the slime.
@@ -425,6 +428,22 @@ public class GameScene : Scene
         _bat.Draw();
 
         // Always end the sprite batch when finished.
+        Core.SpriteBatch.End();
+
+        Core.GraphicsDevice.SetRenderTarget(null);
+
+        // --- 3) Передаём параметры шейдеру ---
+        collisionEffect.Parameters["Texture0"].SetValue(Core.SceneTarget); // важное: texture вход
+        collisionEffect.Parameters["ScreenSize"].SetValue(new Vector2(Core.GraphicsDevice.Viewport.Width, Core.GraphicsDevice.Viewport.Height));
+
+        collisionEffect.Parameters["CircleCenter"].SetValue(new Vector2(_bat.GetBounds().X, _bat.GetBounds().Y));
+        collisionEffect.Parameters["CircleRadius"].SetValue(_bat.GetBounds().Radius * 2);
+        collisionEffect.Parameters["HighlightColor"].SetValue(new Vector4(0.8f, 0.0f, 0.0f, 0.6f)); // зелёный, a=0.6
+        collisionEffect.Parameters["ShowCollision"].SetValue(true);
+
+        // --- 4) Рисуем fullscreen quad с effect: он читает sceneTarget и накладывает подсветку ---
+        Core.SpriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, null, null, null, collisionEffect);
+        Core.SpriteBatch.Draw(Core.SceneTarget, new Rectangle(0, 0, Core.GraphicsDevice.Viewport.Width, Core.GraphicsDevice.Viewport.Height), Color.White);
         Core.SpriteBatch.End();
 
         // Draw the UI.

@@ -37,6 +37,12 @@
 /processorParam:Quality=Best
 /build:audio/ui.wav
 
+#begin CollisionHighlight.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:CollisionHighlight.fx
+
 #begin effects/grayscaleEffect.fx
 /importer:EffectImporter
 /processor:EffectProcessor

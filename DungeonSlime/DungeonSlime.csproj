@@ -26,6 +26,7 @@
     <PackageReference Include="Gum.MonoGame" Version="2025.9.27.1" />
     <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.*" />
     <PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.*" />
+    <PackageReference Include="SkiaSharp" Version="3.119.1" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MonoGameLibrary\MonoGameLibrary.csproj" />
@@ -37,4 +38,17 @@
     <Message Text="Restoring dotnet tools (this might take a while depending on your internet speed and should only happen upon building your project for the first time, or after upgrading MonoGame, or clearing your nuget cache)" Importance="High" />
     <Exec Command="dotnet tool restore" />
   </Target>
+  <Target Name="RasterizeSvg" BeforeTargets="BeforeBuild">
+		<Exec Command="dotnet run --project ..\SvgRasterizer\SvgRasterizer.csproj $(ProjectDir)Content\SVG $(ProjectDir)Content\Generated 128" />
+  </Target>
+	<Target Name="GenerateSvgAndBuildContent" BeforeTargets="BeforeBuild">
+		<!-- 1) Генерация PNG -->
+		<Exec Command="dotnet run --project ..\SvgRasterizer\SvgRasterizer.csproj &quot;$(ProjectDir)Content\SVG&quot; &quot;$(ProjectDir)Content\Generated&quot; 128" WorkingDirectory="$(ProjectDir)" />
+
+		<!-- 2) Добавление PNG в mgcb и сборка -->
+		<Exec Command="powershell -ExecutionPolicy Bypass -NoProfile -Command &quot;&amp; { &amp; '..\add-generated-to-mgcb.ps1' -GeneratedDir &quot;$(ProjectDir)Content\Generated&quot; -MgcbFile &quot;$(ProjectDir)Content\Content.mgcb&quot; -Platform DesktopGL }&quot;" WorkingDirectory="$(ProjectDir)" />
+	</Target>
+
+
+
 </Project>

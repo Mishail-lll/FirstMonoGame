@@ -8,7 +8,7 @@ namespace DungeonSlime.GameObjects;
 
 public class Bat
 {
-    private const float MOVEMENT_SPEED = 5.0f;
+    private const float MOVEMENT_SPEED = 4.0f;
 
     // The velocity of the bat that defines the direction and how much in that
     // direction to update the bats position each update cycle.
@@ -100,7 +100,7 @@ public class Bat
         int y = (int)(Position.Y + _sprite.Height * 0.5f);
         int radius = (int)(_sprite.Width * 0.25f);
 
-        return new Circle(x, y, radius);
+        return new Circle(x, y, radius, new Color(243, 10, 10, 170), 15);
     }
 
     /// <summary>

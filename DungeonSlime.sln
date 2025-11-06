@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DungeonSlime", "DungeonSlim
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonoGameLibrary", "MonoGameLibrary\MonoGameLibrary.csproj", "{C9CF131F-536F-47D8-B93F-A1DE567C0DB3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SvgRasterizer", "SvgRasterizer\SvgRasterizer.csproj", "{0B936265-20E2-6E28-7DC1-37B8A2DE560E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{C9CF131F-536F-47D8-B93F-A1DE567C0DB3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C9CF131F-536F-47D8-B93F-A1DE567C0DB3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C9CF131F-536F-47D8-B93F-A1DE567C0DB3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0B936265-20E2-6E28-7DC1-37B8A2DE560E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0B936265-20E2-6E28-7DC1-37B8A2DE560E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0B936265-20E2-6E28-7DC1-37B8A2DE560E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0B936265-20E2-6E28-7DC1-37B8A2DE560E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

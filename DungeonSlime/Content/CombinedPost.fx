@@ -7,28 +7,28 @@
 Texture2D Texture0;
 sampler2D Texture0Sampler = sampler_state { Texture = <Texture0>; };
 
-
+// Основные параметры
 float Saturation = 0.0;
 float2 ScreenSize = float2(800.0, 600.0);
 
-float4 HighlightColor = float4(0.0, 1.0, 0.0, 0.8);
+// Highlight default (если нужно)
+float4 DefaultHighlight = float4(0.0, 1.0, 0.0, 0.8);
 
-float OutlineThickness = 4.0;
-float OutlineSoftness = 1.0;
-
-#define MAX_CIRCLES 64
-float2 CircleCenters[MAX_CIRCLES];
-float  CircleRadii[MAX_CIRCLES];
+// Упакованные данные: для каждого круга две записи float4
+// data[i].xy = center.xy, data[i].z = radius, data[i].w = thickness
+// color[i] = float4(r,g,b,a)
+#define MAX_CIRCLES 48
+float4 CircleData[MAX_CIRCLES];
+float4 CircleColor[MAX_CIRCLES];
 int    CircleCount = 0;
+bool   ShowCollision = false;
 
-bool ShowCollision = false;
-
+// Pixel shader
 float4 PS_Main(float2 texCoord : TEXCOORD0, float4 vertColor : COLOR0) : COLOR
 {
-
     float4 baseColor = tex2D(Texture0Sampler, texCoord) * vertColor;
 
-
+    // grayscale
     float lum = dot(baseColor.rgb, float3(0.3, 0.59, 0.11));
     float3 gray = float3(lum, lum, lum);
     float3 col = lerp(baseColor.rgb, gray, Saturation);
@@ -36,31 +36,39 @@ float4 PS_Main(float2 texCoord : TEXCOORD0, float4 vertColor : COLOR0) : COLOR
     if (ShowCollision && CircleCount > 0)
     {
         float2 pixelPos = texCoord * ScreenSize;
-        float3 highlight = col;
-        float totalInfluence = 0.0;
-
+        float3 sumRGB = float3(0.0, 0.0, 0.0);
+        float totalInf = 0.0;
 
         [unroll]
         for (int i = 0; i < CircleCount; i++)
         {
-            float2 c = CircleCenters[i];
-            float  r = CircleRadii[i];
+            float4 d = CircleData[i];
+            float2 c = d.xy;
+            float r = d.z;
+            float thickness = d.w;
+            float4 cc = CircleColor[i]; // rgba
 
-            float d = distance(pixelPos, c);
-            float t = abs(d - r);
+            // compute distance to circle outline
+            float dist = distance(pixelPos, c);
+            float t = abs(dist - r);
 
-            float half = max(OutlineThickness * 0.5, 0.0001);
-            float n = saturate(t / half); 
-            float intensity = pow(1.0 - n, max(0.0001, OutlineSoftness)); // 1..0
-            float inf = intensity * HighlightColor.a;
+            float half = max(thickness * 0.5, 0.0001);
+            float n = saturate(t / half);
+            float intensity = pow(1.0 - n, 1.0); // can adjust softness
+            float inf = saturate(intensity * cc.a);
 
-
-            totalInfluence = max(totalInfluence, inf);
+            if (inf > 0.0001)
+            {
+                sumRGB += cc.rgb * inf;
+                totalInf += inf;
+            }
         }
 
-        if (totalInfluence > 0.0)
+        if (totalInf > 0.0)
         {
-            col = lerp(col, HighlightColor.rgb, totalInfluence);
+            float finalInf = saturate(totalInf);
+            float3 highlightRGB = sumRGB / max(totalInf, 1e-6);
+            col = lerp(col, highlightRGB, finalInf);
         }
     }
 

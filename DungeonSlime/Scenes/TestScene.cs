@@ -15,7 +15,8 @@ namespace DungeonSlime.Scenes
     {
         Texture2D exampleSprite;
         RenderTarget2D sceneTarget;
-        Effect collisionEffect;
+        Effect combinedEffect;
+        float _saturation;
         public override void Initialize()
         {
             sceneTarget = new RenderTarget2D(
@@ -26,14 +27,15 @@ namespace DungeonSlime.Scenes
                 Core.GraphicsDevice.PresentationParameters.BackBufferFormat,
                 DepthFormat.None);
             base.Initialize();
+            _saturation = 1.0f;
         }
 
         public override void LoadContent()
         {
-            exampleSprite = Content.Load<Texture2D>("images/background-pattern");
+            exampleSprite = Content.Load<Texture2D>("Generated/UZI3");
 
 
-            collisionEffect = Content.Load<Effect>("CollisionHighlight");
+            combinedEffect = Content.Load<Effect>("CombinedPost");
         }
 
         public override void Update(GameTime gameTime)
@@ -43,28 +45,46 @@ namespace DungeonSlime.Scenes
 
         public override void Draw(GameTime gameTime)
         {
-            Core.GraphicsDevice.SetRenderTarget(sceneTarget);
+            Circle[] colliders = new Circle[] { new Circle(400, 400, 50, new Color(255, 10, 10, 170), 10), new Circle(180, 180, 80, new Color(155, 155, 155, 200), 40) };
+            int count = Math.Min(colliders.Length, 48);
+            Vector4[] data = new Vector4[count];    // CircleData packed
+            Vector4[] cols = new Vector4[count];    // CircleColor
+
+            for (int i = 0; i < count; i++)
+            {
+                var c = colliders[i];
+                data[i] = new Vector4(c.X, c.Y, c.Radius, c.OutlineThickness);
+                cols[i] = new Vector4(c.Color.R / 255f, c.Color.G / 255f, c.Color.B / 255f, c.Color.A / 255f);
+            }
+            for (int i = count; i < count; i++)
+            {
+                data[i] = Vector4.Zero;
+                cols[i] = Vector4.Zero;
+            }
+
+            // 1) Render scene into sceneTarget
+            Core.GraphicsDevice.SetRenderTarget(Core.SceneTarget);
             Core.GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            Core.SpriteBatch.Begin();
+            Core.SpriteBatch.Begin(SpriteSortMode.Deferred, samplerState: SamplerState.PointClamp);
             Core.SpriteBatch.Draw(exampleSprite, new Vector2(100, 100), Color.White);
             Core.SpriteBatch.End();
 
             Core.GraphicsDevice.SetRenderTarget(null);
 
-            collisionEffect.Parameters["Texture0"].SetValue(sceneTarget);
-            collisionEffect.Parameters["ScreenSize"].SetValue(new Vector2(Core.GraphicsDevice.Viewport.Width, Core.GraphicsDevice.Viewport.Height));
+            combinedEffect.Parameters["Texture0"].SetValue(sceneTarget);
+            combinedEffect.Parameters["ScreenSize"].SetValue(new Vector2(Core.GraphicsDevice.Viewport.Width, Core.GraphicsDevice.Viewport.Height));
+            combinedEffect.Parameters["ShowCollision"].SetValue(true);
+            combinedEffect.Parameters["Texture0"].SetValue(Core.SceneTarget);
+            combinedEffect.Parameters["ScreenSize"].SetValue(new Vector2(Core.GraphicsDevice.Viewport.Width, Core.GraphicsDevice.Viewport.Height));
+            combinedEffect.Parameters["Saturation"].SetValue(1 - _saturation);
+            combinedEffect.Parameters["CircleCount"].SetValue(count);
+            combinedEffect.Parameters["CircleData"].SetValue(data);
+            combinedEffect.Parameters["CircleColor"].SetValue(cols);
+            combinedEffect.Parameters["ShowCollision"].SetValue(true);
 
-            Vector2 circleCenter = new Vector2(400f, 300f);
-            float circleRadius = 100f;
-
-            collisionEffect.Parameters["CircleCenter"].SetValue(circleCenter);
-            collisionEffect.Parameters["CircleRadius"].SetValue(circleRadius);
-            collisionEffect.Parameters["HighlightColor"].SetValue(new Vector4(0f, 1f, 0f, 0.6f));
-            collisionEffect.Parameters["ShowCollision"].SetValue(true);
-
-            Core.SpriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, null, null, null, collisionEffect);
-            Core.SpriteBatch.Draw(sceneTarget, new Rectangle(0, 0, Core.GraphicsDevice.Viewport.Width, Core.GraphicsDevice.Viewport.Height), Color.White);
+            Core.SpriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, null, null, null, combinedEffect);
+            Core.SpriteBatch.Draw(Core.SceneTarget, new Rectangle(0, 0, Core.GraphicsDevice.Viewport.Width, Core.GraphicsDevice.Viewport.Height), Color.White);
             Core.SpriteBatch.End();
         }
 

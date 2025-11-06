@@ -260,7 +260,9 @@ public class Slime
         Circle bounds = new Circle(
             (int)(pos.X + (_sprite.Width * 0.5f)),
             (int)(pos.Y + (_sprite.Height * 0.5f)),
-            (int)(_sprite.Width * 0.5f)
+            (int)(_sprite.Width * 0.5f),
+            new Color(10, 243, 10, 170),
+            15
         );
 
         return bounds;

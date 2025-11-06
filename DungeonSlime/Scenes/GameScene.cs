@@ -406,16 +406,21 @@ public class GameScene : Scene
 
     public override void Draw(GameTime gameTime)
     {
-        Circle[] colliders = new Circle[]{ _bat.GetBounds(), _slime.GetBounds(), new Circle(200, 200, 100)};
-        int count = Math.Min(colliders.Length, 64);
-        Vector2[] centers = new Vector2[count];
-        float[] radii = new float[count];
+        Circle[] colliders = new Circle[]{ _bat.GetBounds(), _slime.GetBounds(), new Circle(200, 200, 100, new Color(100, 100, 100), 10)};
+        int count = Math.Min(colliders.Length, 48);
+        Vector4[] data = new Vector4[count];    // CircleData packed
+        Vector4[] cols = new Vector4[count];    // CircleColor
 
         for (int i = 0; i < count; i++)
         {
             var c = colliders[i];
-            centers[i] = new Vector2(c.X, c.Y);
-            radii[i] = c.Radius;
+            data[i] = new Vector4(c.X, c.Y, c.Radius, c.OutlineThickness);
+            cols[i] = new Vector4(c.Color.R / 255f, c.Color.G / 255f, c.Color.B / 255f, c.Color.A / 255f);
+        }
+        for (int i = count; i < count; i++)
+        {
+            data[i] = Vector4.Zero;
+            cols[i] = Vector4.Zero;
         }
 
         // 1) Render scene into sceneTarget
@@ -436,16 +441,12 @@ public class GameScene : Scene
         combinedEffect.Parameters["ScreenSize"].SetValue(new Vector2(Core.GraphicsDevice.Viewport.Width, Core.GraphicsDevice.Viewport.Height));
         combinedEffect.Parameters["Saturation"].SetValue(1 - _saturation);
 
-        // Collision params
-        var bounds = _bat.GetBounds();
-        combinedEffect.Parameters["CircleCenters"].SetValue(centers);
-        combinedEffect.Parameters["CircleRadii"].SetValue(radii);
         combinedEffect.Parameters["CircleCount"].SetValue(count);
-        combinedEffect.Parameters["HighlightColor"].SetValue(new Vector4(0.9f, 0f, 0f, 0.5f));
+        combinedEffect.Parameters["CircleData"].SetValue(data);
+        combinedEffect.Parameters["CircleColor"].SetValue(cols);
         combinedEffect.Parameters["ShowCollision"].SetValue(true);
-        combinedEffect.Parameters["OutlineThickness"].SetValue(10f);
-        combinedEffect.Parameters["OutlineSoftness"].SetValue(0.25f);
 
+        // 3) Drow the effects
         Core.SpriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, null, null, null, combinedEffect);
         Core.SpriteBatch.Draw(Core.SceneTarget, new Rectangle(0, 0, Core.GraphicsDevice.Viewport.Width, Core.GraphicsDevice.Viewport.Height), Color.White);
         Core.SpriteBatch.End();

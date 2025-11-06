@@ -22,6 +22,9 @@ public readonly struct Circle : IEquatable<Circle>
     /// </summary>
     public readonly int Radius;
 
+    public readonly new Color Color;
+
+    public readonly float OutlineThickness;
     /// <summary>
     /// Gets the location of the center of this circle.
     /// </summary>
@@ -68,6 +71,8 @@ public readonly struct Circle : IEquatable<Circle>
         X = x;
         Y = y;
         Radius = radius;
+        Color = Color.Black;
+        OutlineThickness = 15;
     }
 
     /// <summary>
@@ -80,6 +85,17 @@ public readonly struct Circle : IEquatable<Circle>
         X = location.X;
         Y = location.Y;
         Radius = radius;
+        Color = Color.Black;
+        OutlineThickness = 15;
+    }
+
+    public Circle(int x, int y, int radius, Color color, float Thickness)
+    {
+        X = x;
+        Y = y;
+        Radius = radius;
+        Color = color;
+        OutlineThickness = Thickness;
     }
 
     /// <summary>

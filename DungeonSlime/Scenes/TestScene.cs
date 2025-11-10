@@ -32,7 +32,7 @@ namespace DungeonSlime.Scenes
 
         public override void LoadContent()
         {
-            exampleSprite = Content.Load<Texture2D>("Generated/UZI3");
+            exampleSprite = Content.Load<Texture2D>("Generated/UZI1");
 
 
             combinedEffect = Content.Load<Effect>("CombinedPost");

@@ -22,7 +22,7 @@ public readonly struct Circle : IEquatable<Circle>
     /// </summary>
     public readonly int Radius;
 
-    public readonly new Color Color;
+    public readonly Color Color;
 
     public readonly float OutlineThickness;
     /// <summary>

@@ -6,7 +6,7 @@ using MonoGameLibrary.Graphics;
 
 namespace DungeonSlime.GameObjects;
 
-public class Bat
+public class Bat : GameObject
 {
     private const float MOVEMENT_SPEED = 4.0f;
 
@@ -20,10 +20,6 @@ public class Bat
     // The sound effect to play when the bat bounces off the edge of the room.
     private SoundEffect _bounceSoundEffect;
 
-    /// <summary>
-    /// Gets or Sets the position of the bat.
-    /// </summary>
-    public Vector2 Position { get; set; }
 
     /// <summary>
     /// Creates a new Bat using the specified animated sprite and sound effect.
@@ -60,7 +56,7 @@ public class Bat
     /// <param name="normal">The normal vector of the surface the bat is bouncing against.</param>
     public void Bounce(Vector2 normal)
     {
-        Vector2 newPosition = Position;
+        Vector2 newPosition = Pos;
 
         // Adjust the position based on the normal to prevent sticking to walls.
         if (normal.X != 0)
@@ -78,7 +74,7 @@ public class Bat
         }
 
         // Apply the new position
-        Position = newPosition;
+        Pos = newPosition;
 
         // Normalize before reflecting
         normal.Normalize();
@@ -96,8 +92,8 @@ public class Bat
     /// <returns>A Circle value.</returns>
     public Circle GetBounds()
     {
-        int x = (int)(Position.X + _sprite.Width * 0.5f);
-        int y = (int)(Position.Y + _sprite.Height * 0.5f);
+        int x = (int)(Pos.X + _sprite.Width * 0.5f);
+        int y = (int)(Pos.Y + _sprite.Height * 0.5f);
         int radius = (int)(_sprite.Width * 0.25f);
 
         return new Circle(x, y, radius, new Color(243, 10, 10, 170), 15);
@@ -113,7 +109,7 @@ public class Bat
         _sprite.Update(gameTime);
 
         // Update the position of the bat based on the velocity.
-        Position += _velocity;
+        Pos += _velocity;
     }
 
     /// <summary>
@@ -121,7 +117,7 @@ public class Bat
     /// </summary>
     public void Draw()
     {
-        _sprite.Draw(Core.SpriteBatch, Position);
+        _sprite.Draw(Core.SpriteBatch, Pos);
     }
 
 }

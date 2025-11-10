@@ -17,7 +17,7 @@ public static class GameController
     /// <summary>
     /// Returns true if the player has triggered the "move up" action.
     /// </summary>
-    public static bool MoveUp()
+    public static bool JustMoveUp()
     {
         return s_keyboard.WasKeyJustPressed(Keys.Up) ||
                s_keyboard.WasKeyJustPressed(Keys.W) ||
@@ -28,7 +28,7 @@ public static class GameController
     /// <summary>
     /// Returns true if the player has triggered the "move down" action.
     /// </summary>
-    public static bool MoveDown()
+    public static bool JustMoveDown()
     {
         return s_keyboard.WasKeyJustPressed(Keys.Down) ||
                s_keyboard.WasKeyJustPressed(Keys.S) ||
@@ -39,7 +39,7 @@ public static class GameController
     /// <summary>
     /// Returns true if the player has triggered the "move left" action.
     /// </summary>
-    public static bool MoveLeft()
+    public static bool JustMoveLeft()
     {
         return s_keyboard.WasKeyJustPressed(Keys.Left) ||
                s_keyboard.WasKeyJustPressed(Keys.A) ||
@@ -50,7 +50,7 @@ public static class GameController
     /// <summary>
     /// Returns true if the player has triggered the "move right" action.
     /// </summary>
-    public static bool MoveRight()
+    public static bool JustMoveRight()
     {
         return s_keyboard.WasKeyJustPressed(Keys.Right) ||
                s_keyboard.WasKeyJustPressed(Keys.D) ||
@@ -61,7 +61,7 @@ public static class GameController
     /// <summary>
     /// Returns true if the player has triggered the "pause" action.
     /// </summary>
-    public static bool Pause()
+    public static bool JustPause()
     {
         return s_keyboard.WasKeyJustPressed(Keys.Escape) ||
                s_gamePad.WasButtonJustPressed(Buttons.Start);
@@ -71,9 +71,69 @@ public static class GameController
     /// Returns true if the player has triggered the "action" button,
     /// typically used for menu confirmation.
     /// </summary>
-    public static bool Action()
+    public static bool JustAction()
     {
         return s_keyboard.WasKeyJustPressed(Keys.Enter) ||
                s_gamePad.WasButtonJustPressed(Buttons.A);
+    }
+
+    public static bool MoveUp()
+    {
+        return s_keyboard.IsKeyDown(Keys.Up) ||
+               s_keyboard.IsKeyDown(Keys.W) ||
+               s_gamePad.IsButtonDown(Buttons.DPadUp) ||
+               s_gamePad.IsButtonDown(Buttons.LeftThumbstickUp);
+    }
+
+    /// <summary>
+    /// Returns true if the player has triggered the "move down" action.
+    /// </summary>
+    public static bool MoveDown()
+    {
+        return s_keyboard.IsKeyDown(Keys.Down) ||
+               s_keyboard.IsKeyDown(Keys.S) ||
+               s_gamePad.IsButtonDown(Buttons.DPadDown) ||
+               s_gamePad.IsButtonDown(Buttons.LeftThumbstickDown);
+    }
+
+    /// <summary>
+    /// Returns true if the player has triggered the "move left" action.
+    /// </summary>
+    public static bool MoveLeft()
+    {
+        return s_keyboard.IsKeyDown(Keys.Left) ||
+               s_keyboard.IsKeyDown(Keys.A) ||
+               s_gamePad.IsButtonDown(Buttons.DPadLeft) ||
+               s_gamePad.IsButtonDown(Buttons.LeftThumbstickLeft);
+    }
+
+    /// <summary>
+    /// Returns true if the player has triggered the "move right" action.
+    /// </summary>
+    public static bool MoveRight()
+    {
+        return s_keyboard.IsKeyDown(Keys.Right) ||
+               s_keyboard.IsKeyDown(Keys.D) ||
+               s_gamePad.IsButtonDown(Buttons.DPadRight) ||
+               s_gamePad.IsButtonDown(Buttons.LeftThumbstickRight);
+    }
+
+    /// <summary>
+    /// Returns true if the player has triggered the "pause" action.
+    /// </summary>
+    public static bool Pause()
+    {
+        return s_keyboard.IsKeyDown(Keys.Escape) ||
+               s_gamePad.IsButtonDown(Buttons.Start);
+    }
+
+    /// <summary>
+    /// Returns true if the player has triggered the "action" button,
+    /// typically used for menu confirmation.
+    /// </summary>
+    public static bool Action()
+    {
+        return s_keyboard.IsKeyDown(Keys.Enter) ||
+               s_gamePad.IsButtonDown(Buttons.A);
     }
 }

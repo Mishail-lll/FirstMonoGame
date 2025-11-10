@@ -5,7 +5,7 @@ using Svg.Skia;
 
 class Program
 {
-    static readonly int[] SCALES = new[] { 1, 2, 3 };
+    static readonly int[] SCALES = new[] {1};
 
     static int Main(string[] args)
     {

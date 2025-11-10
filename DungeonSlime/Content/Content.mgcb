@@ -60,42 +60,6 @@
 /processorParam:TextureFormat=Compressed
 /build:fonts/04B_30.spritefont
 
-#begin Generated/pistol1.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:Generated/pistol1.png
-
-#begin Generated/pistol2.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:Generated/pistol2.png
-
-#begin Generated/pistol3.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:Generated/pistol3.png
-
 #begin Images/atlas-definition.xml
 /copy:Images/atlas-definition.xml
 
@@ -126,21 +90,15 @@
 #begin Images/tilemap-definition.xml
 /copy:Images/tilemap-definition.xml
 
+#begin Generated/pistol1.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyEnabled=false
+/processorParam:GenerateMipmaps=true
+/build:Generated/pistol1.png
 #begin Generated/UZI1.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyEnabled=false
 /processorParam:GenerateMipmaps=true
 /build:Generated/UZI1.png
-#begin Generated/UZI2.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyEnabled=false
-/processorParam:GenerateMipmaps=true
-/build:Generated/UZI2.png
-#begin Generated/UZI3.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyEnabled=false
-/processorParam:GenerateMipmaps=true
-/build:Generated/UZI3.png

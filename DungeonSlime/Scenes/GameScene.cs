@@ -1,5 +1,4 @@
-﻿using System;
-using DungeonSlime.GameObjects;
+﻿using DungeonSlime.GameObjects;
 using DungeonSlime.UI;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
@@ -8,6 +7,9 @@ using MonoGameGum;
 using MonoGameLibrary;
 using MonoGameLibrary.Graphics;
 using MonoGameLibrary.Scenes;
+using RenderingLibrary;
+using System;
+using System.Diagnostics;
 
 namespace DungeonSlime.Scenes;
 
@@ -25,6 +27,8 @@ public class GameScene : Scene
 
     // Reference to the bat.
     private Bat _bat;
+
+    private AnimatedSprite _exmp;
 
     // Defines the tilemap to draw.
     private Tilemap _tilemap;
@@ -53,6 +57,9 @@ public class GameScene : Scene
     Effect combinedEffect;
 
     Circle batBounds;
+
+    private float _width = 1920;
+    private float _height = 1080;
     public override void Initialize()
     {
         // LoadContent is called during base.Initialize().
@@ -71,7 +78,6 @@ public class GameScene : Scene
 
         // Subscribe to the slime's BodyCollision event so that a game over
         // can be triggered when this event is raised.
-        _slime.BodyCollision += OnSlimeBodyCollision;
 
         // Create any UI elements from the root element created in previous
         // scenes.
@@ -82,8 +88,6 @@ public class GameScene : Scene
 
         // Initialize a new game to be played.
         InitializeNewGame();
-
-
     }
 
     private void InitializeUI()
@@ -128,7 +132,7 @@ public class GameScene : Scene
         slimePos.Y = (_tilemap.Rows * 0.5f) * _tilemap.TileHeight;
 
         // Initialize the slime.
-        _slime.Initialize(slimePos, _tilemap.TileWidth);
+        _slime.Initialize();
 
         // Initialize the bat.
         _bat.RandomizeVelocity();
@@ -146,21 +150,20 @@ public class GameScene : Scene
     {
         // Create the texture atlas from the XML configuration file.
         TextureAtlas atlas = TextureAtlas.FromFile(Core.Content, "images/atlas-definition.xml");
-
         // Create the tilemap from the XML configuration file.
         _tilemap = Tilemap.FromFile(Content, "images/tilemap-definition.xml");
-        _tilemap.Scale = new Vector2(4.0f, 4.0f);
+        _tilemap.Scale = new Vector2((_width / 1280) * 4.0f, (_height / 720) * 4.0f);
 
         // Create the animated sprite for the slime from the atlas.
         AnimatedSprite slimeAnimation = atlas.CreateAnimatedSprite("slime-animation");
-        slimeAnimation.Scale = new Vector2(4.0f, 4.0f);
+        slimeAnimation.Scale = new Vector2((_width / 1280) * 4.0f, (_height / 720) * 4.0f);
 
         // Create the slime.
         _slime = new Slime(slimeAnimation);
-
+        _exmp = slimeAnimation;
         // Create the animated sprite for the bat from the atlas.
         AnimatedSprite batAnimation = atlas.CreateAnimatedSprite("bat-animation");
-        batAnimation.Scale = new Vector2(4.0f, 4.0f);
+        batAnimation.Scale = new Vector2((_width / 1280) * 4.0f, (_height / 720) * 4.0f);
 
         // Load the bounce sound effect for the bat.
         SoundEffect bounceSoundEffect = Content.Load<SoundEffect>("audio/bounce");
@@ -173,6 +176,9 @@ public class GameScene : Scene
 
         // Load the grayscale effect.
         combinedEffect = Content.Load<Effect>("CombinedPost");
+
+        Debug.WriteLine(Core.GraphicsDevice.Viewport.Width / 1280);
+        Debug.WriteLine(Core.GraphicsDevice.Viewport.Height / 720);
     }
 
 
@@ -199,7 +205,7 @@ public class GameScene : Scene
         }
 
         // If the pause button is pressed, toggle the pause state.
-        if (GameController.Pause())
+        if (GameController.JustPause())
         {
             TogglePause();
         }
@@ -210,11 +216,14 @@ public class GameScene : Scene
             return;
         }
 
+        //_camera.Pos = _slime.Pos - new Vector2(Core.GraphicsDevice.Viewport.Width / 2, Core.GraphicsDevice.Viewport.Height / 2);
         // Update the slime.
         _slime.Update(gameTime);
 
         // Update the bat.
         _bat.Update(gameTime);
+
+        //Core.Cam.Update();
 
         // Perform collision checks.
         CollisionChecks();
@@ -238,7 +247,6 @@ public class GameScene : Scene
             _bat.RandomizeVelocity();
 
             // Tell the slime to grow.
-            _slime.Grow();
 
             // Increment the score.
             _score += 100;
@@ -359,7 +367,7 @@ public class GameScene : Scene
         }
 
         // Assign the new bat position.
-        _bat.Position = newBatPosition;
+        _bat.Pos = newBatPosition;
     }
 
     private void OnSlimeBodyCollision(object sender, EventArgs args)
@@ -406,7 +414,7 @@ public class GameScene : Scene
 
     public override void Draw(GameTime gameTime)
     {
-        Circle[] colliders = new Circle[]{ _bat.GetBounds(), _slime.GetBounds(), new Circle(200, 200, 100, new Color(100, 100, 100), 10)};
+        Circle[] colliders = new Circle[]{_bat.GetBounds(), _slime.GetBounds(), new Circle(200, 200, 100, new Color(100, 100, 100), 10)};
         int count = Math.Min(colliders.Length, 48);
         Vector4[] data = new Vector4[count];    // CircleData packed
         Vector4[] cols = new Vector4[count];    // CircleColor
@@ -414,7 +422,8 @@ public class GameScene : Scene
         for (int i = 0; i < count; i++)
         {
             var c = colliders[i];
-            data[i] = new Vector4(c.X, c.Y, c.Radius, c.OutlineThickness);
+            var t = Core.Cam.WorldToScreen(new Vector2(c.X, c.Y));
+            data[i] = new Vector4(t.X, t.Y, c.Radius, c.OutlineThickness);
             cols[i] = new Vector4(c.Color.R / 255f, c.Color.G / 255f, c.Color.B / 255f, c.Color.A / 255f);
         }
         for (int i = count; i < count; i++)
@@ -427,10 +436,11 @@ public class GameScene : Scene
         Core.GraphicsDevice.SetRenderTarget(Core.SceneTarget);
         Core.GraphicsDevice.Clear(Color.CornflowerBlue);
 
-        Core.SpriteBatch.Begin(SpriteSortMode.Deferred, samplerState: SamplerState.PointClamp);
+        Core.SpriteBatch.Begin(SpriteSortMode.Deferred, samplerState: SamplerState.PointClamp, transformMatrix: Core.Cam.GetMatrix());
         _tilemap.Draw(Core.SpriteBatch);
         _slime.Draw();
         _bat.Draw();
+        _exmp.Draw(Core.SpriteBatch, new Vector2(600, 600));
         Core.SpriteBatch.End();
 
         // 2) Back to backbuffer

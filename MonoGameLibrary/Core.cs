@@ -34,7 +34,8 @@ public class Core : Game
     /// </summary>
     public static new GraphicsDevice GraphicsDevice { get; private set; }
 
-    public static RenderTarget2D SceneTarget;
+    public static RenderTarget2D SceneTarget { get; private set; }
+    public static Camera2D Cam { get; private set; }
 
     /// <summary>
     /// Gets the sprite batch used for all 2D rendering.
@@ -131,6 +132,8 @@ public class Core : Game
                 false,
                 GraphicsDevice.PresentationParameters.BackBufferFormat,
                 DepthFormat.None, 0, RenderTargetUsage.DiscardContents);
+
+        Cam = new Camera2D(Core.GraphicsDevice.Viewport, 1.0f, 1.0f, 0.0f);
     }
 
     protected override void UnloadContent()

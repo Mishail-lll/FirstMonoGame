@@ -133,8 +133,10 @@ public class Core : Game
                 GraphicsDevice.PresentationParameters.BackBufferFormat,
                 DepthFormat.None, 0, RenderTargetUsage.DiscardContents);
 
-        Cam = new Camera2D(Core.GraphicsDevice.Viewport, 1.0f, 1.0f, 0.0f);
+        Cam = new Camera2D(0.5f, 0.5f, 0.0f);
     }
+
+    
 
     protected override void UnloadContent()
     {

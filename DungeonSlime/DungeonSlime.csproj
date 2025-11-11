@@ -45,9 +45,6 @@
 	<Target Name="GenerateSvgAndBuildContent" BeforeTargets="BeforeBuild">
 		<!-- 1) Генерация PNG -->
 		<Exec Command="dotnet run --project ..\SvgRasterizer\SvgRasterizer.csproj &quot;$(ProjectDir)Content\SVG&quot; &quot;$(ProjectDir)Content\Generated&quot; 128" WorkingDirectory="$(ProjectDir)" />
-
-		<!-- 2) Добавление PNG в mgcb и сборка -->
-		<Exec Command="powershell -ExecutionPolicy Bypass -NoProfile -Command &quot;&amp; { &amp; '..\add-generated-to-mgcb.ps1' -GeneratedDir &quot;$(ProjectDir)Content\Generated&quot; -MgcbFile &quot;$(ProjectDir)Content\Content.mgcb&quot; -Platform DesktopGL }&quot;" WorkingDirectory="$(ProjectDir)" />
 	</Target>
 
 

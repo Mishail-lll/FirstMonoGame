@@ -60,6 +60,21 @@
 /processorParam:TextureFormat=Compressed
 /build:fonts/04B_30.spritefont
 
+#begin Generated/atlas-texture.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=False
+/processorParam:GenerateMipmaps=True
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Generated/atlas-texture.png
+
+#begin Generated/atlas.xml
+/copy:Generated/atlas.xml
+
 #begin Images/atlas-definition.xml
 /copy:Images/atlas-definition.xml
 
@@ -90,15 +105,3 @@
 #begin Images/tilemap-definition.xml
 /copy:Images/tilemap-definition.xml
 
-#begin Generated/pistol1.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyEnabled=false
-/processorParam:GenerateMipmaps=true
-/build:Generated/pistol1.png
-#begin Generated/UZI1.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyEnabled=false
-/processorParam:GenerateMipmaps=true
-/build:Generated/UZI1.png

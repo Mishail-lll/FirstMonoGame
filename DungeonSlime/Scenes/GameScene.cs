@@ -216,7 +216,6 @@ public class GameScene : Scene
             return;
         }
 
-        //_camera.Pos = _slime.Pos - new Vector2(Core.GraphicsDevice.Viewport.Width / 2, Core.GraphicsDevice.Viewport.Height / 2);
         // Update the slime.
         _slime.Update(gameTime);
 

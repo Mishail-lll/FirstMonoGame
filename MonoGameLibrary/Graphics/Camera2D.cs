@@ -3,7 +3,6 @@ using Microsoft.Xna.Framework.Graphics;
 
 public class Camera2D
 {
-    readonly Viewport _vp;
     public Vector2 Position = Vector2.Zero;   // центр камеры в мировых координатах
     public float ZoomX = 1f;                  // масштаб по X
     public float ZoomY = 1f;                  // масштаб по Y
@@ -11,10 +10,9 @@ public class Camera2D
     public Vector2 Origin;                    // центр экрана
     public Rectangle? Bounds;
 
-    public Camera2D(Viewport viewport, float zoomX, float zoomY, float rot)
+    public Camera2D(float zoomX, float zoomY, float rot)
     {
-        _vp = viewport;
-        Origin = new Vector2(viewport.Width / 2f, viewport.Height / 2f);
+        Origin = new Vector2(1920, 1080) * 0.5f;
         ZoomX = zoomX;
         ZoomY = zoomY;
         Rotation = MathHelper.ToRadians(rot);

@@ -11,7 +11,7 @@ public class Game1 : Core
 {
     private Song _themeSong;
 
-    public Game1() : base("Dungeon Slime", 1920, 1080, true)
+    public Game1() : base("Dungeon Slime", 1920, 1080, false)
     {
 
     }

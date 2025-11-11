@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using DungeonSlime.GameObjects;
 using DungeonSlime.UI;
 using Microsoft.Xna.Framework;
@@ -13,10 +14,11 @@ namespace DungeonSlime.Scenes
 {
     internal class TestScene : Scene
     {
-        Texture2D exampleSprite;
+        Sprite exampleSprite;
         RenderTarget2D sceneTarget;
         Effect combinedEffect;
         float _saturation;
+        Vector2 _pos = new Vector2(960, 540);
         public override void Initialize()
         {
             sceneTarget = new RenderTarget2D(
@@ -32,20 +34,21 @@ namespace DungeonSlime.Scenes
 
         public override void LoadContent()
         {
-            exampleSprite = Content.Load<Texture2D>("Generated/UZI1");
-
-
+            TextureAtlas atlas = TextureAtlas.FromFile(Core.Content, "Generated/atlas.xml");
+            exampleSprite = atlas.CreateSprite("HZ-02");
+            exampleSprite.CenterOrigin();
+            exampleSprite.Scale = new Vector2(1, 1);
             combinedEffect = Content.Load<Effect>("CombinedPost");
         }
 
         public override void Update(GameTime gameTime)
         {
-
+            Core.Cam.Position = _pos;
         }
 
         public override void Draw(GameTime gameTime)
         {
-            Circle[] colliders = new Circle[] { new Circle(400, 400, 50, new Color(255, 10, 10, 170), 10), new Circle(180, 180, 80, new Color(155, 155, 155, 200), 40) };
+            Circle[] colliders = new Circle[] { new Circle(0, 0, 50, new Color(255, 10, 10, 170), 10), new Circle(180, 180, 80, new Color(155, 155, 155, 200), 40) };
             int count = Math.Min(colliders.Length, 48);
             Vector4[] data = new Vector4[count];    // CircleData packed
             Vector4[] cols = new Vector4[count];    // CircleColor
@@ -53,7 +56,8 @@ namespace DungeonSlime.Scenes
             for (int i = 0; i < count; i++)
             {
                 var c = colliders[i];
-                data[i] = new Vector4(c.X, c.Y, c.Radius, c.OutlineThickness);
+                var t = Core.Cam.WorldToScreen(new Vector2(c.X, c.Y));
+                data[i] = new Vector4(t.X, t.Y, c.Radius, c.OutlineThickness);
                 cols[i] = new Vector4(c.Color.R / 255f, c.Color.G / 255f, c.Color.B / 255f, c.Color.A / 255f);
             }
             for (int i = count; i < count; i++)
@@ -66,8 +70,8 @@ namespace DungeonSlime.Scenes
             Core.GraphicsDevice.SetRenderTarget(Core.SceneTarget);
             Core.GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            Core.SpriteBatch.Begin(SpriteSortMode.Deferred, samplerState: SamplerState.PointClamp);
-            Core.SpriteBatch.Draw(exampleSprite, new Vector2(100, 100), Color.White);
+            Core.SpriteBatch.Begin(SpriteSortMode.Deferred, samplerState: SamplerState.PointClamp, transformMatrix: Core.Cam.GetMatrix());
+            exampleSprite.Draw(Core.SpriteBatch, _pos);
             Core.SpriteBatch.End();
 
             Core.GraphicsDevice.SetRenderTarget(null);

@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoGameLibrary.Audio;
 using MonoGameLibrary.Input;
+using MonoGameLibrary.Phisics;
 using MonoGameLibrary.Scenes;
 
 namespace MonoGameLibrary;
@@ -61,6 +62,8 @@ public class Core : Game
     /// Gets a reference to the audio control system.
     /// </summary>
     public static AudioController Audio { get; private set; }
+
+    public static CollisionSystem Cols { get; private set; }
 
     /// <summary>
     /// Creates a new Core instance.
@@ -133,7 +136,8 @@ public class Core : Game
                 GraphicsDevice.PresentationParameters.BackBufferFormat,
                 DepthFormat.None, 0, RenderTargetUsage.DiscardContents);
 
-        Cam = new Camera2D(0.5f, 0.5f, 0.0f);
+        Cam = new Camera2D(1, 1, 0.0f);
+        Cols = new CollisionSystem(initialCapacity: 256, maxLayers: 5);
     }
 
     

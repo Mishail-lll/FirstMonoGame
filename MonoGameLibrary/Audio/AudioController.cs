@@ -147,7 +147,8 @@ public class AudioController : IDisposable
         soundEffectInstance.IsLooped = isLooped;
 
         // Tell the instance to play
-        soundEffectInstance.Play();
+        if (soundEffectInstance != null)
+            soundEffectInstance.Play();
 
         // Add it to the active instances for tracking
         _activeSoundEffectInstances.Add(soundEffectInstance);

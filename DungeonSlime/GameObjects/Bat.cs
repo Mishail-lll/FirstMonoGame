@@ -15,7 +15,8 @@ public class Bat : GameObject
     private Vector2 _velocity;
 
     // The AnimatedSprite used when drawing the bat.
-    private AnimatedSprite _sprite;
+    public AnimatedSprite Sprite {  get; private set; }
+    public int ColliderId { get; private set; }
 
     // The sound effect to play when the bat bounces off the edge of the room.
     private SoundEffect _bounceSoundEffect;
@@ -28,10 +29,13 @@ public class Bat : GameObject
     /// <param name="bounceSoundEffect">The sound effect to play when the bat bounces off a wall.</param>
     public Bat(AnimatedSprite sprite, SoundEffect bounceSoundEffect)
     {
-        _sprite = sprite;
+        Sprite = sprite;
         _bounceSoundEffect = bounceSoundEffect;
     }
-
+    public void Initialize()
+    {
+        ColliderId = Core.Cols.CreateCircle(Pos, radius: 40f, layer: 2, new Color(243, 10, 10, 170));
+    }
     /// <summary>
     /// Randomizes the velocity of the bat.
     /// </summary>
@@ -50,10 +54,33 @@ public class Bat : GameObject
         _velocity = direction * MOVEMENT_SPEED;
     }
 
+    public void Check(Rectangle roomBounds)
+    {
+        Circle batBounds = GetBounds();
+        if (batBounds.Top < roomBounds.Top)
+        {
+            Bounce(Vector2.UnitY);
+        }
+        else if (batBounds.Bottom > roomBounds.Bottom)
+        {
+            Bounce(-Vector2.UnitY);
+        }
+
+        if (batBounds.Left < roomBounds.Left)
+        {
+            Bounce(Vector2.UnitX);
+        }
+        else if (batBounds.Right > roomBounds.Right)
+        {
+            Bounce(-Vector2.UnitX);
+        }
+    }
+
     /// <summary>
     /// Handles a bounce event when the bat collides with a wall or boundary.
     /// </summary>
     /// <param name="normal">The normal vector of the surface the bat is bouncing against.</param>
+    
     public void Bounce(Vector2 normal)
     {
         Vector2 newPosition = Pos;
@@ -63,14 +90,14 @@ public class Bat : GameObject
         {
             // We are bouncing off a vertical wall (left/right).
             // Move slightly away from the wall in the direction of the normal.
-            newPosition.X += normal.X * (_sprite.Width * 0.1f);
+            newPosition.X += normal.X * (Sprite.Width * 0.1f);
         }
 
         if (normal.Y != 0)
         {
             // We are bouncing off a horizontal wall (top/bottom).
             // Move slightly way from the wall in the direction of the normal.
-            newPosition.Y += normal.Y * (_sprite.Height * 0.1f);
+            newPosition.Y += normal.Y * (Sprite.Height * 0.1f);
         }
 
         // Apply the new position
@@ -92,9 +119,9 @@ public class Bat : GameObject
     /// <returns>A Circle value.</returns>
     public Circle GetBounds()
     {
-        int x = (int)(Pos.X + _sprite.Width * 0.5f);
-        int y = (int)(Pos.Y + _sprite.Height * 0.5f);
-        int radius = (int)(_sprite.Width * 0.25f);
+        int x = (int)(Pos.X + Sprite.Width * 0.5f);
+        int y = (int)(Pos.Y + Sprite.Height * 0.5f);
+        int radius = (int)(Sprite.Width * 0.25f);
 
         return new Circle(x, y, radius, new Color(243, 10, 10, 170), 15);
     }
@@ -106,10 +133,11 @@ public class Bat : GameObject
     public void Update(GameTime gameTime)
     {
         // Update the animated sprite
-        _sprite.Update(gameTime);
+        Sprite.Update(gameTime);
 
         // Update the position of the bat based on the velocity.
         Pos += _velocity;
+        Core.Cols.SetPosition(ColliderId, new Vector2(Pos.X + Sprite.Width * 0.5f, Pos.Y + Sprite.Height * 0.5f));
     }
 
     /// <summary>
@@ -117,7 +145,7 @@ public class Bat : GameObject
     /// </summary>
     public void Draw()
     {
-        _sprite.Draw(Core.SpriteBatch, Pos);
+        Sprite.Draw(Core.SpriteBatch, Pos);
     }
 
 }

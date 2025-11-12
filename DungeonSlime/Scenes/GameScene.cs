@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework.Graphics;
 using MonoGameGum;
 using MonoGameLibrary;
 using MonoGameLibrary.Graphics;
+using MonoGameLibrary.Phisics;
 using MonoGameLibrary.Scenes;
 using RenderingLibrary;
 using System;
@@ -60,6 +61,10 @@ public class GameScene : Scene
 
     private float _width = 1920;
     private float _height = 1080;
+    //Test
+    int boxColliderId;
+
+    bool _isEnter;
     public override void Initialize()
     {
         // LoadContent is called during base.Initialize().
@@ -127,13 +132,9 @@ public class GameScene : Scene
     {
         // Calculate the position for the slime, which will be at the center
         // tile of the tile map.
-        Vector2 slimePos = new Vector2();
-        slimePos.X = (_tilemap.Columns * 0.5f) * _tilemap.TileWidth;
-        slimePos.Y = (_tilemap.Rows * 0.5f) * _tilemap.TileHeight;
+        _slime.Pos = new Vector2(Core.GraphicsDevice.Viewport.Width, Core.GraphicsDevice.Viewport.Height) * 0.5f;
 
         // Initialize the slime.
-        _slime.Initialize();
-
         // Initialize the bat.
         _bat.RandomizeVelocity();
         PositionBatAwayFromSlime();
@@ -177,8 +178,42 @@ public class GameScene : Scene
         // Load the grayscale effect.
         combinedEffect = Content.Load<Effect>("CombinedPost");
 
+        _slime.Initialize();
+        _bat.Initialize();
         Debug.WriteLine(Core.GraphicsDevice.Viewport.Width / 1280);
         Debug.WriteLine(Core.GraphicsDevice.Viewport.Height / 720);
+
+        //Test
+        // init collision system: capacity 256, layers = 5 (0..4)
+        // register handlers
+        Core.Cols.RegisterHandler(0, 2, (in CollisionSystem.CollisionInfo info) =>
+        {
+            Debug.WriteLine($"Collision: idA={info.IdA} (layer{info.LayerA}) hit idB={info.IdB} (layer{info.LayerB})");
+            // Move the bat to a new position away from the slime.
+            PositionBatAwayFromSlime();
+
+            // Randomize the velocity of the bat.
+            _bat.RandomizeVelocity();
+
+            // Tell the slime to grow.
+
+            // Increment the score.
+            _score += 100;
+
+            // Update the score display on the UI.
+            _ui.UpdateScoreText(_score);
+
+            // Play the collect sound effect.
+            Core.Audio.PlaySoundEffect(_collectSoundEffect);
+        });
+        Core.Cols.RegisterHandler(0, 1, (in CollisionSystem.CollisionInfo info) =>
+        {
+            //Debug.WriteLine($"Collision: idA={info.IdA} (layer{info.LayerA}) hit idB={info.IdB} (layer{info.LayerB})");
+            _isEnter = true;
+        });
+        boxColliderId = Core.Cols.CreateBox(new Vector2(Core.GraphicsDevice.Viewport.Width, Core.GraphicsDevice.Viewport.Height) * 0.5f, new Vector2(940, 520), layer: 1);
+
+        // If you changed handlers after creation, no additional call needed because Register updates internal flags
     }
 
 
@@ -216,81 +251,24 @@ public class GameScene : Scene
             return;
         }
 
+
         // Update the slime.
         _slime.Update(gameTime);
-
-        // Update the bat.
         _bat.Update(gameTime);
+        _bat.Check(_roomBounds);
 
-        //Core.Cam.Update();
+        // box static; no update needed
+        Core.Cols.ProcessCollisions();
 
-        // Perform collision checks.
-        CollisionChecks();
-    }
-
-
-    private void CollisionChecks()
-    {
-        // Capture the current bounds of the slime and bat.
-        Circle slimeBounds = _slime.GetBounds();
-        Circle batBounds = _bat.GetBounds();
-
-        // FIrst perform a collision check to see if the slime is colliding with
-        // the bat, which means the slime eats the bat.
-        if (slimeBounds.Intersects(batBounds))
-        {
-            // Move the bat to a new position away from the slime.
-            PositionBatAwayFromSlime();
-
-            // Randomize the velocity of the bat.
-            _bat.RandomizeVelocity();
-
-            // Tell the slime to grow.
-
-            // Increment the score.
-            _score += 100;
-
-            // Update the score display on the UI.
-            _ui.UpdateScoreText(_score);
-
-            // Play the collect sound effect.
-            Core.Audio.PlaySoundEffect(_collectSoundEffect);
-        }
-
-        // Next check if the slime is colliding with the wall by validating if
-        // it is within the bounds of the room.  If it is outside the room
-        // bounds, then it collided with a wall which triggers a game over.
-        if (slimeBounds.Top < _roomBounds.Top ||
-           slimeBounds.Bottom > _roomBounds.Bottom ||
-           slimeBounds.Left < _roomBounds.Left ||
-           slimeBounds.Right > _roomBounds.Right)
+        // At the end of update loop, process collisions
+        if (!_isEnter)
         {
             GameOver();
             return;
         }
-
-        // Finally, check if the bat is colliding with a wall by validating if
-        // it is within the bounds of the room.  If it is outside the room
-        // bounds, then it collided with a wall, and the bat should bounce
-        // off of that wall.
-        if (batBounds.Top < _roomBounds.Top)
-        {
-            _bat.Bounce(Vector2.UnitY);
-        }
-        else if (batBounds.Bottom > _roomBounds.Bottom)
-        {
-            _bat.Bounce(-Vector2.UnitY);
-        }
-
-        if (batBounds.Left < _roomBounds.Left)
-        {
-            _bat.Bounce(Vector2.UnitX);
-        }
-        else if (batBounds.Right > _roomBounds.Right)
-        {
-            _bat.Bounce(-Vector2.UnitX);
-        }
+        _isEnter = false;
     }
+
 
     private void PositionBatAwayFromSlime()
     {
@@ -413,7 +391,8 @@ public class GameScene : Scene
 
     public override void Draw(GameTime gameTime)
     {
-        Circle[] colliders = new Circle[]{_bat.GetBounds(), _slime.GetBounds(), new Circle(200, 200, 100, new Color(100, 100, 100), 10)};
+        //Circle[] colliders = new Circle[] { _bat.GetBounds(), _slime.GetBounds(), new Circle(200, 200, 100, new Color(100, 100, 100), 10) };
+        Circle[] colliders = new Circle[] { Core.Cols.GetBounds(_slime.ColliderId), Core.Cols.GetBounds(_bat.ColliderId) };
         int count = Math.Min(colliders.Length, 48);
         Vector4[] data = new Vector4[count];    // CircleData packed
         Vector4[] cols = new Vector4[count];    // CircleColor

@@ -13,12 +13,13 @@ public class Slime : GameObject
 {
 
     // The AnimatedSprite used when drawing each slime segment
-    private AnimatedSprite _sprite;
+    public AnimatedSprite Sprite { get; private set; }
+    public int ColliderId { get; private set; }
     private Vector2 _vel;
     private float _speed;
     public Slime(AnimatedSprite sprite)
     {
-        _sprite = sprite;
+        Sprite = sprite;
     }
 
     public void Initialize()
@@ -26,6 +27,7 @@ public class Slime : GameObject
         _speed = 8.0f;
         Pos = new Vector2(Core.GraphicsDevice.Viewport.Width * 0.5f, Core.GraphicsDevice.Viewport.Height * 0.5f);
         Core.Cam.Position = Pos;
+        ColliderId = Core.Cols.CreateCircle(Pos, radius: 60f, layer: 0, new Color(10, 243, 10, 170)); // player - layer 0
     }
 
     private void HandleInput()
@@ -52,12 +54,14 @@ public class Slime : GameObject
     public void Update(GameTime gameTime)
     {
         // Update the animated sprite.
-        _sprite.Update(gameTime);
+        Sprite.Update(gameTime);
 
         // Handle any player input
         HandleInput();
 
         Move(gameTime);
+        Core.Cols.SetPosition(ColliderId, new Vector2(Pos.X + Sprite.Width * 0.5f, Pos.Y + Sprite.Height * 0.5f));
+
     }
 
     /// <summary>
@@ -65,7 +69,7 @@ public class Slime : GameObject
     /// </summary>
     public void Draw()
     {
-        _sprite.Draw(Core.SpriteBatch, Pos);
+        Sprite.Draw(Core.SpriteBatch, Pos);
 
     }
 
@@ -74,9 +78,9 @@ public class Slime : GameObject
 
         // Create the bounds using the calculated visual position of the head.
         Circle bounds = new Circle(
-            (int)(Pos.X + (_sprite.Width * 0.5f)),
-            (int)(Pos.Y + (_sprite.Height * 0.5f)),
-            (int)(_sprite.Width * 0.5f),
+            (int)(Pos.X + (Sprite.Width * 0.5f)),
+            (int)(Pos.Y + (Sprite.Height * 0.5f)),
+            (int)(Sprite.Width * 0.5f),
             new Color(10, 243, 10, 170),
             15
         );

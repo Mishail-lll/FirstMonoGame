@@ -27,7 +27,7 @@ public class Slime : GameObject
         _speed = 8.0f;
         Pos = new Vector2(Core.GraphicsDevice.Viewport.Width * 0.5f, Core.GraphicsDevice.Viewport.Height * 0.5f);
         Core.Cam.Position = Pos;
-        ColliderId = Core.Cols.CreateCircle(Pos, radius: 60f, layer: 0, new Color(10, 243, 10, 170)); // player - layer 0
+        ColliderId = Core.Cols.CreateCircle(Pos,  60f,  0, new Color(10, 243, 10, 170)); // player - layer 0
     }
 
     private void HandleInput()

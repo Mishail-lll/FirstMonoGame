@@ -1,16 +1,21 @@
 ﻿using DungeonSlime.GameObjects;
 using DungeonSlime.UI;
+using Gum.Wireframe;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGameGum;
+using MonoGameGum.Forms.DefaultVisuals;
 using MonoGameLibrary;
 using MonoGameLibrary.Graphics;
 using MonoGameLibrary.Phisics;
 using MonoGameLibrary.Scenes;
 using RenderingLibrary;
 using System;
+using System.Linq;
+using System.Collections.Generic;
 using System.Diagnostics;
+using static MonoGameLibrary.Phisics.CollisionSystem;
 
 namespace DungeonSlime.Scenes;
 
@@ -29,6 +34,7 @@ public class GameScene : Scene
     // Reference to the bat.
     private Bat _bat;
 
+
     private AnimatedSprite _exmp;
 
     // Defines the tilemap to draw.
@@ -37,8 +43,6 @@ public class GameScene : Scene
     // Defines the bounds of the room that the slime and bat are contained within.
     private Rectangle _roomBounds;
 
-    // The sound effect to play when the slime eats a bat.
-    private SoundEffect _collectSoundEffect;
 
     // Tracks the players score.
     private int _score;
@@ -59,12 +63,31 @@ public class GameScene : Scene
 
     Circle batBounds;
 
+    CollisionHandler _batHandler;
+    CollisionHandler _exitHandler;
+
+
     private float _width = 1920;
     private float _height = 1080;
     //Test
     int boxColliderId;
+    int testColliderId;
+    static public readonly Queue<Action> _queue = new Queue<Action>();
 
-    bool _isEnter;
+    void OnBatCollision()
+    {
+
+        PositionBatAwayFromSlime();
+        _bat.RandomizeVelocity();
+        _score += 100;
+        _ui.UpdateScoreText(_score);
+        Core.Audio.PlaySoundEffectByKey("collect");
+    }
+    void exitCollisionAction()
+    {
+        Core.Audio.PlaySoundEffectByKey("collect");
+        GameOver();
+    }
     public override void Initialize()
     {
         // LoadContent is called during base.Initialize().
@@ -93,6 +116,8 @@ public class GameScene : Scene
 
         // Initialize a new game to be played.
         InitializeNewGame();
+
+        Core.Cols.DebugDumpState();
     }
 
     private void InitializeUI()
@@ -133,12 +158,12 @@ public class GameScene : Scene
         // Calculate the position for the slime, which will be at the center
         // tile of the tile map.
         _slime.Pos = new Vector2(Core.GraphicsDevice.Viewport.Width, Core.GraphicsDevice.Viewport.Height) * 0.5f;
-
+        Core.Cols.SetPosition(_slime.ColliderId, new Vector2(_slime.Pos.X + _slime.Sprite.Width * 0.5f, _slime.Pos.Y + _slime.Sprite.Height * 0.5f));
         // Initialize the slime.
         // Initialize the bat.
         _bat.RandomizeVelocity();
         PositionBatAwayFromSlime();
-
+        Core.Cols.SetPosition(_bat.ColliderId, new Vector2(_bat.Pos.X + _bat.Sprite.Width * 0.5f, _bat.Pos.Y + _bat.Sprite.Height * 0.5f));
         // Reset the score.
         _score = 0;
 
@@ -173,7 +198,7 @@ public class GameScene : Scene
         _bat = new Bat(batAnimation, bounceSoundEffect);
 
         // Load the collect sound effect.
-        _collectSoundEffect = Content.Load<SoundEffect>("audio/collect");
+        Core.Audio.Load("collect", "audio/collect");
 
         // Load the grayscale effect.
         combinedEffect = Content.Load<Effect>("CombinedPost");
@@ -183,35 +208,16 @@ public class GameScene : Scene
         Debug.WriteLine(Core.GraphicsDevice.Viewport.Width / 1280);
         Debug.WriteLine(Core.GraphicsDevice.Viewport.Height / 720);
 
+
+
         //Test
         // init collision system: capacity 256, layers = 5 (0..4)
         // register handlers
-        Core.Cols.RegisterHandler(0, 2, (in CollisionSystem.CollisionInfo info) =>
-        {
-            Debug.WriteLine($"Collision: idA={info.IdA} (layer{info.LayerA}) hit idB={info.IdB} (layer{info.LayerB})");
-            // Move the bat to a new position away from the slime.
-            PositionBatAwayFromSlime();
-
-            // Randomize the velocity of the bat.
-            _bat.RandomizeVelocity();
-
-            // Tell the slime to grow.
-
-            // Increment the score.
-            _score += 100;
-
-            // Update the score display on the UI.
-            _ui.UpdateScoreText(_score);
-
-            // Play the collect sound effect.
-            Core.Audio.PlaySoundEffect(_collectSoundEffect);
-        });
-        Core.Cols.RegisterHandler(0, 1, (in CollisionSystem.CollisionInfo info) =>
-        {
-            //Debug.WriteLine($"Collision: idA={info.IdA} (layer{info.LayerA}) hit idB={info.IdB} (layer{info.LayerB})");
-            _isEnter = true;
-        });
+        Core.Cols.RegisterHandler(0, 2, (in CollisionSystem.CollisionInfo info) => OnBatCollision());
+        Core.Cols.RegisterExitHandler(0, 1, (in CollisionSystem.CollisionInfo info) => exitCollisionAction());
+        Core.Cols.RegisterEnterHandler(0, 3, (in CollisionSystem.CollisionInfo info) => exitCollisionAction());
         boxColliderId = Core.Cols.CreateBox(new Vector2(Core.GraphicsDevice.Viewport.Width, Core.GraphicsDevice.Viewport.Height) * 0.5f, new Vector2(940, 520), layer: 1);
+        testColliderId = Core.Cols.CreateCircle(new Vector2(600, 600), 60f, layer: 3, Color.White * 0.5f);
 
         // If you changed handlers after creation, no additional call needed because Register updates internal flags
     }
@@ -257,18 +263,12 @@ public class GameScene : Scene
         _bat.Update(gameTime);
         _bat.Check(_roomBounds);
 
-        // box static; no update needed
+
+        //MainThreadDispatcher.ProcessPending();
         Core.Cols.ProcessCollisions();
-
+        //MainThreadDispatcher.ProcessPending();
         // At the end of update loop, process collisions
-        if (!_isEnter)
-        {
-            GameOver();
-            return;
-        }
-        _isEnter = false;
     }
-
 
     private void PositionBatAwayFromSlime()
     {
@@ -380,9 +380,10 @@ public class GameScene : Scene
     {
         // Show the game over panel.
         _ui.ShowGameOverPanel();
-
         // Set the game state to game over.
         _state = GameState.GameOver;
+
+        _ui.UpdateScoreText(0);
 
         // Set the grayscale effect saturation to 1.0f
         _saturation = 1.0f;
@@ -392,7 +393,7 @@ public class GameScene : Scene
     public override void Draw(GameTime gameTime)
     {
         //Circle[] colliders = new Circle[] { _bat.GetBounds(), _slime.GetBounds(), new Circle(200, 200, 100, new Color(100, 100, 100), 10) };
-        Circle[] colliders = new Circle[] { Core.Cols.GetBounds(_slime.ColliderId), Core.Cols.GetBounds(_bat.ColliderId) };
+        Circle[] colliders = new Circle[] { Core.Cols.GetBounds(_slime.ColliderId), Core.Cols.GetBounds(_bat.ColliderId), Core.Cols.GetBounds(testColliderId)};
         int count = Math.Min(colliders.Length, 48);
         Vector4[] data = new Vector4[count];    // CircleData packed
         Vector4[] cols = new Vector4[count];    // CircleColor

@@ -1,7 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.Xna.Framework.Audio;
+﻿using Microsoft.Xna.Framework.Audio;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Media;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace MonoGameLibrary.Audio;
 
@@ -20,6 +22,8 @@ public class AudioController : IDisposable
     /// Gets a value that indicates if audio is muted.
     /// </summary>
     public bool IsMuted { get; private set; }
+
+    private Dictionary<string, SoundEffect> _sounds;
 
     /// <summary>
     /// Gets or Sets the global volume of songs.
@@ -90,6 +94,7 @@ public class AudioController : IDisposable
     public AudioController()
     {
         _activeSoundEffectInstances = new List<SoundEffectInstance>();
+        _sounds = new Dictionary<string, SoundEffect>();
     }
 
     // Finalizer called when object is collected by the garbage collector.
@@ -112,6 +117,105 @@ public class AudioController : IDisposable
                 }
                 _activeSoundEffectInstances.RemoveAt(i);
             }
+        }
+    }
+
+    public void Load(string key, string val)
+    {
+        // загрузи нужные звуки сюда или делай lazy load в Play
+        _sounds = new Dictionary<string, SoundEffect>(StringComparer.OrdinalIgnoreCase);
+        // пример:
+        _sounds[key] = Core.Content.Load<SoundEffect>(val);
+    }
+
+    private SoundEffect GetOrReload(string key, SoundEffect known)
+    {
+        // если уже есть объект и он, видимо, валиден — вернуть
+        if (known != null) return known;
+
+        if (Core.Content == null) return null;
+        try
+        {
+            var s = Core.Content.Load<SoundEffect>(key);
+            _sounds[key] = s;
+            return s;
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"AudioController: reload failed for {key}: {ex}");
+            return null;
+        }
+    }
+    public void PlaySoundEffectByKey(string key, float volume = 1f, float pitch = 0f, float pan = 0f, bool loop = false)
+    {
+        if (string.IsNullOrEmpty(key)) return;
+        SoundEffect sfx = null;
+        _sounds?.TryGetValue(key, out sfx);
+
+        // Попытка 1: если есть sfx — создать инстанс и play
+        if (sfx != null)
+        {
+            TryPlayInstance(sfx, volume, pitch, pan, loop, key);
+            return;
+        }
+
+        // Попытка 2: lazy reload
+        //sfx = GetOrReload(key, null);
+        //if (sfx != null)
+        //{
+        //    TryPlayInstance(sfx, volume, pitch, pan, loop, key);
+        //    return;
+        //}
+
+        // Попытка 3: ничего не получилось — лог
+        Debug.WriteLine($"AudioController: PlaySoundEffectByKey failed - no resource for key '{key}'");
+    }
+
+    // TryPlayInstance: единственный метод, оборачивающий ошибки
+    private void TryPlayInstance(SoundEffect sfx, float volume, float pitch, float pan, bool loop, string keyForReload = null)
+    {
+        if (sfx == null) return;
+
+        SoundEffectInstance inst = null;
+        try
+        {
+            inst = sfx.CreateInstance();
+            inst.Volume = volume;
+            inst.Pitch = pitch;
+            inst.Pan = pan;
+            inst.IsLooped = loop;
+            inst.Play();
+            Debug.WriteLine($"volume - {inst.Volume}");
+            if (loop)
+                _activeSoundEffectInstances.Add(inst); // only store looped ones
+            else
+                // For non-looped you may dispose later or rely on platform to finish
+            return;
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"AudioController: instance.Play() failed for key='{keyForReload}' ex={ex.GetType().Name}:{ex.Message}");
+            //try { inst?.Dispose(); } catch { }
+
+            //// Если у нас есть ключ — попробуем перезагрузить asset и попытаться ещё раз
+            //if (!string.IsNullOrEmpty(keyForReload) && Core.Content != null)
+            //{
+            //    try
+            //    {
+            //        var reloaded = Core.Content.Load<SoundEffect>(keyForReload);
+            //        _sounds[keyForReload] = reloaded;
+            //        var retry = reloaded.CreateInstance();
+            //        retry.Volume = volume; retry.Pitch = pitch; retry.Pan = pan; retry.IsLooped = loop;
+            //        retry.Play();
+            //        Debug.WriteLine($"volume - {retry.Volume}");
+            //        if (loop) _activeSoundEffectInstances.Add(retry);
+            //        return;
+            //    }
+            //    catch (Exception rex)
+            //    {
+            //        Debug.WriteLine($"AudioController: retry after reload failed: {rex}");
+            //    }
+            //}
         }
     }
 
@@ -147,8 +251,7 @@ public class AudioController : IDisposable
         soundEffectInstance.IsLooped = isLooped;
 
         // Tell the instance to play
-        if (soundEffectInstance != null)
-            soundEffectInstance.Play();
+        soundEffectInstance.Play();
 
         // Add it to the active instances for tracking
         _activeSoundEffectInstances.Add(soundEffectInstance);

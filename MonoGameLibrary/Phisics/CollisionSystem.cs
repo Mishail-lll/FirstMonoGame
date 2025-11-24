@@ -76,8 +76,19 @@ namespace MonoGameLibrary.Phisics
         readonly int _maxLayers;
 
         // callbacks matrix and fast check
-        readonly CollisionHandler[,] _callbacks;
-        readonly bool[,] _hasCallback;
+        CollisionHandler[,] _callbacks;
+        bool[,] _hasCallback;
+
+        // enter/exit handlers
+        CollisionHandler[,] _enterHandlers;
+        CollisionHandler[,] _exitHandlers;
+        bool[,] _hasEnterHandler;
+        bool[,] _hasExitHandler;
+
+        // pair tracking between frames
+        private System.Collections.Generic.HashSet<long> _prevPairs = new System.Collections.Generic.HashSet<long>();
+        private System.Collections.Generic.HashSet<long> _currPairs = new System.Collections.Generic.HashSet<long>();
+
 
         // colliders storage: array for ref access and minimal GC.
         Collider[] _colliders;
@@ -94,6 +105,11 @@ namespace MonoGameLibrary.Phisics
             _maxLayers = maxLayers;
             _callbacks = new CollisionHandler[_maxLayers, _maxLayers];
             _hasCallback = new bool[_maxLayers, _maxLayers];
+            _enterHandlers = new CollisionHandler[_maxLayers, _maxLayers];
+            _exitHandlers = new CollisionHandler[_maxLayers, _maxLayers];
+            _hasEnterHandler = new bool[_maxLayers, _maxLayers];
+            _hasExitHandler = new bool[_maxLayers, _maxLayers];
+
 
             _colliders = new Collider[initialCapacity];
             _freeStack = new int[initialCapacity];
@@ -108,7 +124,7 @@ namespace MonoGameLibrary.Phisics
         {
             ValidateLayer(layerA); ValidateLayer(layerB);
             _callbacks[layerA, layerB] += handler;
-            if (layerA != layerB) _callbacks[layerB, layerA] += handler;
+            //if (layerA != layerB) _callbacks[layerB, layerA] += handler;
             UpdateHasCallback(layerA, layerB);
         }
 
@@ -117,15 +133,64 @@ namespace MonoGameLibrary.Phisics
         {
             ValidateLayer(layerA); ValidateLayer(layerB);
             _callbacks[layerA, layerB] -= handler;
-            if (layerA != layerB) _callbacks[layerB, layerA] -= handler;
+            //if (layerA != layerB) _callbacks[layerB, layerA] -= handler;
             UpdateHasCallback(layerA, layerB);
+        }
+
+        public void UnregisterAllHendlers()
+        {
+            _callbacks = new CollisionHandler[_maxLayers, _maxLayers];
+            _enterHandlers = new CollisionHandler[_maxLayers, _maxLayers];
+            _exitHandlers = new CollisionHandler[_maxLayers, _maxLayers];
+            _hasCallback = new bool[_maxLayers, _maxLayers];
+            _hasEnterHandler = new bool[_maxLayers, _maxLayers];
+            _hasExitHandler = new bool[_maxLayers, _maxLayers];
         }
 
         void UpdateHasCallback(int a, int b)
         {
             _hasCallback[a, b] = _callbacks[a, b] != null;
-            if (a != b) _hasCallback[b, a] = _callbacks[b, a] != null;
+            //if (a != b) _hasCallback[b, a] = _callbacks[b, a] != null;
         }
+
+        // Register/Unregister enter handlers (symmetric)
+        public void RegisterEnterHandler(int layerA, int layerB, CollisionHandler handler)
+        {
+            ValidateLayer(layerA); ValidateLayer(layerB);
+            _enterHandlers[layerA, layerB] += handler;
+            //if (layerA != layerB) _enterHandlers[layerB, layerA] += handler;
+            _hasEnterHandler[layerA, layerB] = _enterHandlers[layerA, layerB] != null;
+            //if (layerA != layerB) _hasEnterHandler[layerB, layerA] = _enterHandlers[layerB, layerA] != null;
+        }
+
+        public void UnregisterEnterHandler(int layerA, int layerB, CollisionHandler handler)
+        {
+            ValidateLayer(layerA); ValidateLayer(layerB);
+            _enterHandlers[layerA, layerB] -= handler;
+            //if (layerA != layerB) _enterHandlers[layerB, layerA] -= handler;
+            _hasEnterHandler[layerA, layerB] = _enterHandlers[layerA, layerB] != null;
+            //if (layerA != layerB) _hasEnterHandler[layerB, layerA] = _enterHandlers[layerB, layerA] != null;
+        }
+
+        // Register/Unregister exit handlers (symmetric)
+        public void RegisterExitHandler(int layerA, int layerB, CollisionHandler handler)
+        {
+            ValidateLayer(layerA); ValidateLayer(layerB);
+            _exitHandlers[layerA, layerB] += handler;
+            //if (layerA != layerB) _exitHandlers[layerB, layerA] += handler;
+            _hasExitHandler[layerA, layerB] = _exitHandlers[layerA, layerB] != null;
+            //if (layerA != layerB) _hasExitHandler[layerB, layerA] = _exitHandlers[layerB, layerA] != null;
+        }
+
+        public void UnregisterExitHandler(int layerA, int layerB, CollisionHandler handler)
+        {
+            ValidateLayer(layerA); ValidateLayer(layerB);
+            _exitHandlers[layerA, layerB] -= handler;
+            //if (layerA != layerB) _exitHandlers[layerB, layerA] -= handler;
+            _hasExitHandler[layerA, layerB] = _exitHandlers[layerA, layerB] != null;
+            //if (layerA != layerB) _hasExitHandler[layerB, layerA] = _exitHandlers[layerB, layerA] != null;
+        }
+
 
         /// <summary>Clear all handlers.</summary>
         public void ClearHandlers()
@@ -240,6 +305,15 @@ namespace MonoGameLibrary.Phisics
             _colliders[id] = tmp;
         }
 
+        public void RemoveAll()
+        {
+            for (int i = 0; i < _count; i++)
+                _colliders[i].Active = false;
+            _freeCount = 0;
+            for (int i = 0; i < _count; i++) _freeStack[_freeCount++] = i;
+        }
+
+
         /// <summary>Set box half-size.</summary>
         public void SetHalfSize(int id, Vector2 halfSize)
         {
@@ -286,66 +360,239 @@ namespace MonoGameLibrary.Phisics
         /// Algorithm: O(n^2) narrow-phase but _skips_ any pair whose layers have no handler registered.
         /// For many objects use spatial partitioning (not implemented here) — we keep API minimal and clear.
         /// </summary>
+        /// <summary>
+        /// Простая, надёжная реализация ProcessCollisions:
+        /// - собирает пары столкновений в _currPairs
+        /// - вызывает per-frame handlers (как раньше)
+        /// - затем генерирует enter (curr \ prev) и exit (prev \ curr)
+        /// - обновляет _prevPairs
+        /// </summary>
         public void ProcessCollisions()
         {
-            // Precondition: if handlers changed externally, user must have updated _hasCallback matrix via Register/Unregister which update it.
-            // Iterate pairs
+            // очистить текущие пары на старте кадра
+            _currPairs.Clear();
+
             int n = _count;
             for (int i = 0; i < n; i++)
             {
                 ref var A = ref _colliders[i];
                 if (!A.Active) continue;
 
-                for (int j = i + 1; j < n; j++)
+                for (int j = 0; j < n; j++)
                 {
                     ref var B = ref _colliders[j];
                     if (!B.Active) continue;
 
-                    // quick layer filter
-                    if (!_hasCallback[A.Layer, B.Layer]) continue;
 
-                    // AABB quick reject
-                    A.GetAABB(out Vector2 amin, out Vector2 amax);
-                    B.GetAABB(out Vector2 bmin, out Vector2 bmax);
-                    if (amax.X < bmin.X || amin.X > bmax.X || amax.Y < bmin.Y || amin.Y > bmax.Y)
-                        continue;
+                    // быстрый фильтр по уровням: если для этой пары уровней никто не подписан - пропустить
+                    if (!_hasCallback[A.Layer, B.Layer] && !_hasEnterHandler[A.Layer, B.Layer] && !_hasExitHandler[A.Layer, B.Layer]) continue;
 
+                    // AABB check
+                    Vector2 amin, amax, bmin, bmax;
+                    A.GetAABB(out amin, out amax);
+                    B.GetAABB(out bmin, out bmax);
+                    if (amax.X < bmin.X || amin.X > bmax.X || amax.Y < bmin.Y || amin.Y > bmax.Y) continue;
+
+                    // narrow-phase
                     bool hit = false;
-                    // narrow phase
                     if (A.Shape == Shape.Circle)
                     {
-                        if (B.Shape == Shape.Circle)
-                            hit = CircleVsCircle(in A, in B);
-                        else
-                            hit = CircleVsBox(in A, in B);
+                        if (B.Shape == Shape.Circle) hit = CircleVsCircle(in A, in B);
+                        else hit = CircleVsBox(in A, in B);
                     }
                     else
                     {
-                        if (B.Shape == Shape.Circle)
-                            hit = CircleVsBox(in B, in A); // circle, box (order reversed)
-                        else
-                            hit = BoxVsBox(in A, in B);
+                        if (B.Shape == Shape.Circle) hit = CircleVsBox(in B, in A);
+                        else hit = BoxVsBox(in A, in B);
                     }
 
-                    if (hit)
-                    {
-                        var info = new CollisionInfo
-                        {
-                            IdA = A.Id,
-                            IdB = B.Id,
-                            LayerA = A.Layer,
-                            LayerB = B.Layer,
-                            ShapeA = A.Shape,
-                            ShapeB = B.Shape
-                        };
+                    if (!hit) continue;
 
-                        // call registered handlers for this pair (note: matrix holds symmetric handlers if registered that way)
+
+                    // track pair
+                    long key = PairKey(A.Id, B.Id);
+                    _currPairs.Add(key);
+
+                    // build info for per-frame handlers
+                    var info = new CollisionInfo
+                    {
+                        IdA = A.Id,
+                        IdB = B.Id,
+                        LayerA = A.Layer,
+                        LayerB = B.Layer,
+                        ShapeA = A.Shape,
+                        ShapeB = B.Shape
+                    };
+
+                    // call per-frame handlers safely (if any)
+                    if (_hasCallback[A.Layer, B.Layer])
+                    {
                         var cb = _callbacks[A.Layer, B.Layer];
-                        cb?.Invoke(in info);
+                        Debug.WriteLine(A.Layer + " " + B.Layer);
+                        try { cb?.Invoke(info); }
+                        catch (Exception ex) { System.Diagnostics.Debug.WriteLine($"Collision handler threw: {ex}"); }
                     }
                 }
             }
+
+            // --- ENTER: pairs in curr but not in prev ---
+            foreach (var key in _currPairs)
+            {
+                if (!_prevPairs.Contains(key))
+                {
+                    UnpackKey(key, out int id1, out int id2);
+                    if (!ValidId(id1) || !ValidId(id2)) continue;
+                    var a = _colliders[id1];
+                    var b = _colliders[id2];
+                    CollisionInfo info;
+
+                    if (a.Layer > b.Layer)
+                        (a, b) = (b, a);
+
+                    info = new CollisionInfo
+                    {
+                        IdA = a.Id,
+                        IdB = b.Id,
+                        LayerA = a.Layer,
+                        LayerB = b.Layer,
+                        ShapeA = a.Shape,
+                        ShapeB = b.Shape
+                    };
+                    if (_hasEnterHandler[info.LayerA, info.LayerB])
+                    {
+                        Debug.WriteLine(info.LayerA + " " + info.LayerB);
+                        var h = _enterHandlers[info.LayerA, info.LayerB];
+                        try { h?.Invoke(info); }
+                        catch (Exception ex) { System.Diagnostics.Debug.WriteLine($"Enter handler threw: {ex}"); }
+                    }
+                }
+            }
+
+            // --- EXIT: pairs in prev but not in curr ---
+            foreach (var key in _prevPairs)
+            {
+                if (!_currPairs.Contains(key))
+                {
+                    UnpackKey(key, out int id1, out int id2);
+                    // it's possible one of ids became invalid (removed this frame) — guard
+                    if (id1 < 0 || id2 < 0 || id1 >= _count || id2 >= _count) continue;
+                    var a = _colliders[id1];
+                    var b = _colliders[id2];
+
+                    if (a.Layer > b.Layer)
+                        (a, b) = (b, a);
+
+                    var info = new CollisionInfo
+                    {
+                        IdA = a.Id,
+                        IdB = b.Id,
+                        LayerA = a.Layer,
+                        LayerB = b.Layer,
+                        ShapeA = a.Shape,
+                        ShapeB = b.Shape
+                    };
+
+                    if (_hasExitHandler[info.LayerA, info.LayerB])
+                    {
+                        Debug.WriteLine(info.LayerA + " " + info.LayerB);
+                        var h = _exitHandlers[info.LayerA, info.LayerB];
+                        try { h?.Invoke(info); }
+                        catch (Exception ex) { System.Diagnostics.Debug.WriteLine($"Exit handler threw: {ex}"); }
+                    }
+                }
+            }
+
+            // swap: prev = curr
+            _prevPairs.Clear();
+            foreach (var k in _currPairs) _prevPairs.Add(k);
+            _currPairs.Clear();
         }
+
+
+        public void DebugDumpState()
+        {
+            int active = 0;
+            for (int i = 0; i < _count; i++) if (_colliders[i].Active && !_freeContains(i)) active++;
+            Debug.WriteLine($"[Collision] capacity={_colliders.Length}, count={_count}, freeCount={_freeCount}, activeColliders={active}");
+
+            int handlers = 0;
+            for (int a = 0; a < _maxLayers; a++)
+                for (int b = 0; b < _maxLayers; b++)
+                    if (_callbacks[a, b] != null) handlers++;
+
+            Debug.WriteLine($"[Collision] registered handler cells = {handlers}");
+            // optional: dump _hasCallback matrix
+            for (int a = 0; a < _maxLayers; a++)
+            {
+                string line = $"layers {a}:";
+                for (int b = 0; b < _maxLayers; b++) line += _hasCallback[a, b] ? "1" : "0";
+                Debug.WriteLine(line);
+            }
+        }
+
+
+        // Вставить в класс CollisionSystem вместо прямого cb?.Invoke(in info);
+        private void SafeInvokeHandlers(int layerA, int layerB, in CollisionInfo info)
+        {
+            var del = _callbacks[layerA, layerB];
+            if (del == null) return;
+
+            var invList = del.GetInvocationList();
+            bool changed = false;
+
+            foreach (var d in invList)
+            {
+                var handler = (CollisionHandler)d;
+                object target = d.Target;
+                string targetName = target?.GetType().FullName ?? "<static>";
+                string methodName = d.Method.Name;
+
+                try
+                {
+                    // лог перед вызовом — поможет понять последовательность
+                    //Debug.WriteLine($"[Collision] Invoking handler {methodName} on {targetName} for layers {layerA}-{layerB}");
+                    handler(in info);
+                }
+                catch (Exception ex)
+                {
+                    // логируем полную инфу — это ключ к выявлению виновника
+                    Debug.WriteLine($"[Collision] Handler threw: {ex.GetType().Name}: {ex.Message}\nTarget={targetName}, Method={methodName}\nStack:\n{ex.StackTrace}");
+
+                    // опция: автоматически удалить проблемный делегат, чтобы не падать снова
+                    // включи это, если хочешь, чтобы система сама чистилась от битых обработчиков
+                    bool autoUnregister = true;
+                    if (autoUnregister)
+                    {
+                        _callbacks[layerA, layerB] -= handler;
+                        if (layerA != layerB) _callbacks[layerB, layerA] -= handler;
+                        changed = true;
+                    }
+                    // не пробрасываем исключение дальше
+                }
+            }
+
+            if (changed)
+            {
+                _hasCallback[layerA, layerB] = _callbacks[layerA, layerB] != null;
+                if (layerA != layerB) _hasCallback[layerB, layerA] = _callbacks[layerB, layerA] != null;
+            }
+        }
+
+        // normalize pair to single long key (unordered)
+        private static long PairKey(int idA, int idB)
+        {
+            if (idA <= idB)
+                return ((long)idA << 32) | (uint)idB;
+            else
+                return ((long)idB << 32) | (uint)idA;
+        }
+
+        private static void UnpackKey(long key, out int idA, out int idB)
+        {
+            idA = (int)(key >> 32);
+            idB = (int)(key & 0xFFFFFFFF);
+        }
+
 
         // ---------- Narrow-phase helper implementations (no sqrt) ----------
         static bool CircleVsCircle(in Collider a, in Collider b)
@@ -392,4 +639,6 @@ namespace MonoGameLibrary.Phisics
             return _hasCallback[layerA, layerB];
         }
     }
+
+
 }

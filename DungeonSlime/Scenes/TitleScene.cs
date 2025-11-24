@@ -104,11 +104,14 @@ public class TitleScene : Scene
         // screen background.
         _backgroundDestination = Core.GraphicsDevice.PresentationParameters.Bounds;
 
+        Core.Cols.UnregisterAllHendlers();
+
         InitializeUI();
     }
 
     public override void LoadContent()
     {
+        Core.Cols.RemoveAll();
         // Load the font for the standard text.
         _font = Core.Content.Load<SpriteFont>("fonts/04B_30");
 

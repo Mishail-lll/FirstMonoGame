@@ -80,14 +80,13 @@ public class TitleScene : Scene
 
         // While on the title screen, we can enable exit on escape so the player
         // can close the game by pressing the escape key.
-        Core.ExitOnEscape = true;
 
         // Set the position and origin for the Dungeon text.
         Vector2 size = _font5x.MeasureString(DUNGEON_TEXT);
         _dungeonTextPos = new Vector2(640, 100);
         _dungeonTextOrigin = size * 0.5f;
 
-        // Set the position and origin for the Slime text.
+        // Set the position and origin for the Player text.
         size = _font5x.MeasureString(SLIME_TEXT);
         _slimeTextPos = new Vector2(757, 207);
         _slimeTextOrigin = size * 0.5f;
@@ -131,11 +130,6 @@ public class TitleScene : Scene
 
     public override void Update(GameTime gameTime)
     {
-        // If the user presses enter, switch to the game scene.
-        if (Core.Input.Keyboard.WasKeyJustPressed(Keys.Enter))
-        {
-            Core.ChangeScene(new GameScene());
-        }
 
         // Update the offsets for the background pattern wrapping so that it
         // scrolls down and to the right.
@@ -175,11 +169,11 @@ public class TitleScene : Scene
             // Draw the Dungeon text on top of that at its original position
             Core.SpriteBatch.DrawString(_font5x, DUNGEON_TEXT, _dungeonTextPos, Color.White, 0.0f, _dungeonTextOrigin, 1.0f, SpriteEffects.None, 1.0f);
 
-            // Draw the Slime text slightly offset from it is original position and
+            // Draw the Player text slightly offset from it is original position and
             // with a transparent color to give it a drop shadow
             Core.SpriteBatch.DrawString(_font5x, SLIME_TEXT, _slimeTextPos + new Vector2(10, 10), dropShadowColor, 0.0f, _slimeTextOrigin, 1.0f, SpriteEffects.None, 1.0f);
 
-            // Draw the Slime text on top of that at its original position
+            // Draw the Player text on top of that at its original position
             Core.SpriteBatch.DrawString(_font5x, SLIME_TEXT, _slimeTextPos, Color.White, 0.0f, _slimeTextOrigin, 1.0f, SpriteEffects.None, 1.0f);
 
             // Always end the sprite batch when finished.
@@ -197,21 +191,31 @@ public class TitleScene : Scene
         _titleScreenButtonsPanel.Dock(Gum.Wireframe.Dock.Fill);
         _titleScreenButtonsPanel.AddToRoot();
 
-        AnimatedButton startButton = new AnimatedButton(_atlas);
-        startButton.Anchor(Gum.Wireframe.Anchor.BottomLeft);
-        startButton.Visual.X = 50;
-        startButton.Visual.Y = -12;
-        startButton.Text = "Start";
-        startButton.Click += HandleStartClicked;
-        _titleScreenButtonsPanel.AddChild(startButton);
-
-        _optionsButton = new AnimatedButton(_atlas);
-        _optionsButton.Anchor(Gum.Wireframe.Anchor.BottomRight);
-        _optionsButton.Visual.X = -50;
+        _optionsButton = new AnimatedButton(_atlas, 0.27f, 130, 86, 70);
+        _optionsButton.Anchor(Gum.Wireframe.Anchor.BottomLeft);
+        _optionsButton.Visual.X = 50;
         _optionsButton.Visual.Y = -12;
         _optionsButton.Text = "Options";
         _optionsButton.Click += HandleOptionsClicked;
         _titleScreenButtonsPanel.AddChild(_optionsButton);
+
+        AnimatedButton startButton = new AnimatedButton(_atlas, 0.4f, 130, 86, 70);
+        startButton.Anchor(Gum.Wireframe.Anchor.Bottom);
+        startButton.Visual.Width = 30;
+        startButton.Visual.Height = 20;
+        startButton.Visual.X = 0;
+        startButton.Visual.Y = -16;
+        startButton.Text = "Start";
+        startButton.Click += HandleStartClicked;
+        _titleScreenButtonsPanel.AddChild(startButton);
+
+        AnimatedButton _exitButton = new AnimatedButton(_atlas, 0.27f, 130, 86, 70);
+        _exitButton.Anchor(Gum.Wireframe.Anchor.BottomRight);
+        _exitButton.Visual.X = -50;
+        _exitButton.Visual.Y = -12;
+        _exitButton.Text = "Exit";
+        _exitButton.Click += HandleExitClicked;
+        _titleScreenButtonsPanel.AddChild(_exitButton);
 
         startButton.IsFocused = true;
     }
@@ -241,6 +245,10 @@ public class TitleScene : Scene
         _optionsBackButton.IsFocused = true;
     }
 
+    private void HandleExitClicked(object sender, EventArgs e)
+    {
+        Core.ExitOnEscape = true;
+    }
     private void CreateOptionsPanel()
     {
         _optionsPanel = new Panel();
@@ -257,35 +265,35 @@ public class TitleScene : Scene
         optionsText.CustomFontFile = @"fonts/04b_30.fnt";
         _optionsPanel.AddChild(optionsText);
 
-        OptionsSlider musicSlider = new OptionsSlider(_atlas);
+        OptionsSlider musicSlider = new OptionsSlider(_atlas, "0%", "200%");
         musicSlider.Name = "MusicSlider";
         musicSlider.Text = "MUSIC";
         musicSlider.Anchor(Gum.Wireframe.Anchor.Top);
         musicSlider.Visual.Y = 30f;
         musicSlider.Minimum = 0;
         musicSlider.Maximum = 1;
-        musicSlider.Value = Core.Audio.SongVolume;
+        musicSlider.Value = 0.5f;
         musicSlider.SmallChange = .1;
         musicSlider.LargeChange = .2;
         musicSlider.ValueChanged += HandleMusicSliderValueChanged;
         musicSlider.ValueChangeCompleted += HandleMusicSliderValueChangeCompleted;
         _optionsPanel.AddChild(musicSlider);
 
-        OptionsSlider sfxSlider = new OptionsSlider(_atlas);
+        OptionsSlider sfxSlider = new OptionsSlider(_atlas, "0%", "200%");
         sfxSlider.Name = "SfxSlider";
         sfxSlider.Text = "SFX";
         sfxSlider.Anchor(Gum.Wireframe.Anchor.Top);
         sfxSlider.Visual.Y = 93;
         sfxSlider.Minimum = 0;
         sfxSlider.Maximum = 1;
-        sfxSlider.Value = Core.Audio.SoundEffectVolume;
+        sfxSlider.Value = 0.5f;
         sfxSlider.SmallChange = .1;
         sfxSlider.LargeChange = .2;
         sfxSlider.ValueChanged += HandleSfxSliderChanged;
         sfxSlider.ValueChangeCompleted += HandleSfxSliderChangeCompleted;
         _optionsPanel.AddChild(sfxSlider);
 
-        _optionsBackButton = new AnimatedButton(_atlas);
+        _optionsBackButton = new AnimatedButton(_atlas, 0.27f, 130, 86, 70);
         _optionsBackButton.Text = "BACK";
         _optionsBackButton.Anchor(Gum.Wireframe.Anchor.BottomRight);
         _optionsBackButton.X = -28f;

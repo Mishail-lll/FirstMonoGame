@@ -4,20 +4,28 @@ using System.Diagnostics;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using MonoGameLibrary;
+using MonoGameLibrary.Input;
 using MonoGameLibrary.Graphics;
 
 
 namespace DungeonSlime.GameObjects;
 
-public class Slime : GameObject
+public class Player : GameObject
 {
 
     // The AnimatedSprite used when drawing each slime segment
     public AnimatedSprite Sprite { get; private set; }
+
+    public enum DamageType
+    {
+        Male
+    }
     public int ColliderId { get; private set; }
+    public float Hp { get; private set; }
+    public float MaxHp { get; private set; }
     private Vector2 _vel;
     private float _speed;
-    public Slime(AnimatedSprite sprite)
+    public Player(AnimatedSprite sprite)
     {
         Sprite = sprite;
     }
@@ -25,9 +33,11 @@ public class Slime : GameObject
     public void Initialize()
     {
         _speed = 8.0f;
-        Pos = new Vector2(Core.GraphicsDevice.Viewport.Width * 0.5f, Core.GraphicsDevice.Viewport.Height * 0.5f);
+        MaxHp = 100;
+        Hp = MaxHp;
+        Pos = Core.Viewport;
         Core.Cam.Position = Pos;
-        ColliderId = Core.Cols.CreateCircle(Pos,  60f,  0, new Color(10, 243, 10, 170)); // player - layer 0
+        ColliderId = Core.Cols.CreateCircle(Pos + Sprite.Scale * 0.5f, 60f, 0, new Color(10, 243, 10, 170)); // player - layer 0
     }
 
     private void HandleInput()
@@ -41,7 +51,7 @@ public class Slime : GameObject
     }
 
 
-    private void Move(GameTime t)
+    private void Move()
     {
         Pos += _vel * _speed;
         Core.Cam.Position = Pos;
@@ -59,15 +69,15 @@ public class Slime : GameObject
         // Handle any player input
         HandleInput();
 
-        Move(gameTime);
-        Core.Cols.SetPosition(ColliderId, new Vector2(Pos.X + Sprite.Width * 0.5f, Pos.Y + Sprite.Height * 0.5f));
+        Move();
+        Core.Cols.SetPosition(ColliderId, Pos);
 
     }
 
     /// <summary>
     /// Draws the slime.
     /// </summary>
-    public void Draw()
+    public override void Draw()
     {
         Sprite.Draw(Core.SpriteBatch, Pos);
 
@@ -86,5 +96,10 @@ public class Slime : GameObject
         );
 
         return bounds;
+    }
+
+    public void GetDamage(float Damage, DamageType type)
+    {
+        Hp -= Damage;
     }
 }

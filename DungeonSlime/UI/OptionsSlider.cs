@@ -33,7 +33,7 @@ public class OptionsSlider : Slider
     /// Creates a new OptionsSlider instance using graphics from the specified texture atlas.
     /// </summary>
     /// <param name="atlas">The texture atlas containing slider graphics.</param>
-    public OptionsSlider(TextureAtlas atlas)
+    public OptionsSlider(TextureAtlas atlas, string min, string max)
     {
         // Create the top-level container for all visual elements
         ContainerRuntime topLevelContainer = new ContainerRuntime();
@@ -144,7 +144,7 @@ public class OptionsSlider : Slider
         offText.CustomFontFile = @"fonts/04b_30.fnt";
         offText.FontScale = 0.25f;
         offText.UseCustomFont = true;
-        offText.Text = "0%";
+        offText.Text = min;
         offText.Anchor(Gum.Wireframe.Anchor.Center);
         offBackground.AddChild(offText);
 
@@ -156,7 +156,7 @@ public class OptionsSlider : Slider
         maxText.CustomFontFile = @"fonts/04b_30.fnt";
         maxText.FontScale = 0.25f;
         maxText.UseCustomFont = true;
-        maxText.Text = "100%";
+        maxText.Text = max;
         maxText.Anchor(Gum.Wireframe.Anchor.Center);
         maxBackground.AddChild(maxText);
 

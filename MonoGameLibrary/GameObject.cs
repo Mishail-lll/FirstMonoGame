@@ -5,10 +5,11 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 
-namespace DungeonSlime.GameObjects
+namespace MonoGameLibrary;
+
+public class GameObject
 {
-    public class GameObject
-    {
-        public Vector2 Pos { get; set; }
-    }
+    public Vector2 Pos { get; set; }
+    public virtual void Update() { }
+    public virtual void Draw() { }
 }

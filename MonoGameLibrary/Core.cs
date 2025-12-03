@@ -37,11 +37,11 @@ public class Core : Game
 
     public static RenderTarget2D SceneTarget { get; private set; }
     public static Camera2D Cam { get; private set; }
-
     /// <summary>
     /// Gets the sprite batch used for all 2D rendering.
     /// </summary>
     public static SpriteBatch SpriteBatch { get; private set; }
+    public static Vector2 Viewport { get; private set; }
 
     /// <summary>
     /// Gets the content manager used to load global assets.
@@ -107,8 +107,7 @@ public class Core : Game
         // Mouse is visible by default.
         IsMouseVisible = true;
 
-        // Exit on escape is true by default
-        ExitOnEscape = true;
+        ExitOnEscape = false;
     }
 
     protected override void Initialize()
@@ -127,7 +126,8 @@ public class Core : Game
 
         // Create a new audio controller.
         Audio = new AudioController();
-
+        Audio.SongVolume = 0.5f;
+        Audio.SoundEffectVolume = 0.5f;
         SceneTarget = new RenderTarget2D(
                 GraphicsDevice,
                 GraphicsDevice.Viewport.Width,
@@ -136,6 +136,7 @@ public class Core : Game
                 GraphicsDevice.PresentationParameters.BackBufferFormat,
                 DepthFormat.None, 0, RenderTargetUsage.DiscardContents);
 
+        Viewport = new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
         Cam = new Camera2D(1, 1, 0.0f);
         Cols = new CollisionSystem(initialCapacity: 256, maxLayers: 5);
     }
@@ -158,7 +159,7 @@ public class Core : Game
         // Update the audio controller.
         Audio.Update();
 
-        if (ExitOnEscape && Input.Keyboard.WasKeyJustPressed(Keys.Escape))
+        if (ExitOnEscape)
         {
             Exit();
         }

@@ -15,7 +15,7 @@ namespace DungeonSlime.UI;
 public class GameSceneUI : ContainerRuntime
 {
     // The string format to use when updating the text for the score display.
-    private static readonly string s_scoreFormat = "SCORE: {0:D6}";
+    private static readonly string s_scoreFormat = "SCORE: {0:D1}";
 
     // The sound effect to play for auditory feedback of the user interface.
     private SoundEffect _uiSoundEffect;
@@ -74,6 +74,7 @@ public class GameSceneUI : ContainerRuntime
         // Create the text that will display the players score and add it as
         // a child to this container.
         _scoreText = CreateScoreText();
+        _scoreText.Color = Color.Red;
         AddChild(_scoreText);
 
         // Create the Pause panel that is displayed when the game is paused and
@@ -133,7 +134,7 @@ public class GameSceneUI : ContainerRuntime
         text.Y = 10.0f;
         panel.AddChild(text);
 
-        _resumeButton = new AnimatedButton(atlas);
+        _resumeButton = new AnimatedButton(atlas, 0.27f, 130, 86, 70);
         _resumeButton.Text = "RESUME";
         _resumeButton.Anchor(Gum.Wireframe.Anchor.BottomLeft);
         _resumeButton.Visual.X = 9.0f;
@@ -144,7 +145,7 @@ public class GameSceneUI : ContainerRuntime
 
         panel.AddChild(_resumeButton);
 
-        AnimatedButton quitButton = new AnimatedButton(atlas);
+        AnimatedButton quitButton = new AnimatedButton(atlas, 0.27f, 130, 86, 70);
         quitButton.Text = "QUIT";
         quitButton.Anchor(Gum.Wireframe.Anchor.BottomRight);
         quitButton.Visual.X = -9.0f;
@@ -190,7 +191,7 @@ public class GameSceneUI : ContainerRuntime
         text.Y = 10.0f;
         panel.AddChild(text);
 
-        _retryButton = new AnimatedButton(atlas);
+        _retryButton = new AnimatedButton(atlas, 0.27f, 130, 86, 70);
         _retryButton.Text = "RETRY";
         _retryButton.Anchor(Gum.Wireframe.Anchor.BottomLeft);
         _retryButton.Visual.X = 9.0f;
@@ -201,7 +202,7 @@ public class GameSceneUI : ContainerRuntime
 
         panel.AddChild(_retryButton);
 
-        AnimatedButton quitButton = new AnimatedButton(atlas);
+        AnimatedButton quitButton = new AnimatedButton(atlas, 0.27f, 130, 86, 70);
         quitButton.Text = "QUIT";
         quitButton.Anchor(Gum.Wireframe.Anchor.BottomRight);
         quitButton.Visual.X = -9.0f;
@@ -272,9 +273,9 @@ public class GameSceneUI : ContainerRuntime
     /// Updates the text on the score display.
     /// </summary>
     /// <param name="score">The score to display.</param>
-    public void UpdateScoreText(int score)
+    public void UpdateScoreText(float score)
     {
-        _scoreText.Text = string.Format(s_scoreFormat, score);
+        _scoreText.Text = string.Format(s_scoreFormat, (int)score);
     }
 
     /// <summary>

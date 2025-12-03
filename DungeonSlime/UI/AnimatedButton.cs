@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Security.Cryptography.X509Certificates;
 using Gum.DataTypes;
 using Gum.DataTypes.Variables;
 using Gum.Forms.Controls;
@@ -21,7 +22,7 @@ internal class AnimatedButton : Button
     /// Creates a new AnimatedButton instance using graphics from the specified texture atlas.
     /// </summary>
     /// <param name="atlas">The texture atlas containing button graphics and animations</param>
-    public AnimatedButton(TextureAtlas atlas)
+    public AnimatedButton(TextureAtlas atlas, float fontScale, int B, int G, int R)
     {
         // Each Forms conrol has a general Visual property that
         // has properties shared by all control types. This Visual
@@ -44,12 +45,12 @@ internal class AnimatedButton : Button
 
         TextRuntime textInstance = buttonVisual.TextInstance;
         textInstance.Text = "START";
-        textInstance.Blue = 130;
-        textInstance.Green = 86;
-        textInstance.Red = 70;
+        textInstance.Blue = B;
+        textInstance.Green = G;
+        textInstance.Red = R;
         textInstance.UseCustomFont = true;
         textInstance.CustomFontFile = "fonts/04b_30.fnt";
-        textInstance.FontScale = 0.25f;
+        textInstance.FontScale = fontScale;
         textInstance.Anchor(Gum.Wireframe.Anchor.Center);
         textInstance.Width = 0;
         textInstance.WidthUnits = DimensionUnitType.RelativeToChildren;

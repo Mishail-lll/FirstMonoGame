@@ -2,13 +2,13 @@
 <TextureAtlas>
   <Texture>Generated/atlas-texture</Texture>
   <Regions>
-    <Region name="HZ-01" x="0" y="0" width="512" height="512" />
-    <Region name="HZ-02" x="512" y="0" width="512" height="512" />
-    <Region name="HZ-03" x="1024" y="0" width="512" height="512" />
-    <Region name="HZ-04" x="1536" y="0" width="512" height="512" />
-    <Region name="HZ-05" x="0" y="512" width="512" height="512" />
-    <Region name="HZ-06" x="512" y="512" width="512" height="512" />
-    <Region name="HZ-07" x="1024" y="512" width="512" height="512" />
-    <Region name="HZ-08" x="1536" y="512" width="512" height="512" />
+    <Region name="HZ-01" x="0" y="0" width="256" height="256" />
+    <Region name="HZ-02" x="256" y="0" width="256" height="256" />
+    <Region name="HZ-03" x="512" y="0" width="256" height="256" />
+    <Region name="HZ-04" x="768" y="0" width="256" height="256" />
+    <Region name="HZ-05" x="0" y="256" width="256" height="256" />
+    <Region name="HZ-06" x="256" y="256" width="256" height="256" />
+    <Region name="HZ-07" x="512" y="256" width="256" height="256" />
+    <Region name="HZ-08" x="768" y="256" width="256" height="256" />
   </Regions>
 </TextureAtlas>

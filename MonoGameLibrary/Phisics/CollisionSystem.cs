@@ -338,7 +338,7 @@ namespace MonoGameLibrary.Phisics
             return ref _colliders[id];
         }
 
-        bool ValidId(int id) => id >= 0 && id < _count && !_freeContains(id);
+        public bool ValidId(int id) => id >= 0 && id < _count && !_freeContains(id);
 
         public Circle GetBounds(int id)
         {

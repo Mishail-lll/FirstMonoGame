@@ -10,5 +10,6 @@
     <Region name="HZ-06" x="256" y="256" width="256" height="256" />
     <Region name="HZ-07" x="512" y="256" width="256" height="256" />
     <Region name="HZ-08" x="768" y="256" width="256" height="256" />
+    <Region name="HZ-09" x="0" y="512" width="256" height="256" />
   </Regions>
 </TextureAtlas>

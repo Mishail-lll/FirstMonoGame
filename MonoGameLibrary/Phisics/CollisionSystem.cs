@@ -295,6 +295,14 @@ namespace MonoGameLibrary.Phisics
             _colliders[id] = tmp;
         }
 
+        public void SetColor(int id, Color color)
+        {
+            if (!ValidId(id)) return;
+            var tmp = _colliders[id];
+            tmp.Color = color;
+            _colliders[id] = tmp;
+        }
+
         /// <summary>Set circle radius.</summary>
         public void SetRadius(int id, float radius)
         {

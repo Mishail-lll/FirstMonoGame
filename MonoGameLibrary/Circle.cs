@@ -98,6 +98,15 @@ public readonly struct Circle : IEquatable<Circle>
         OutlineThickness = Thickness;
     }
 
+    public Circle(Vector2 pos, int radius, Color color, float Thickness)
+    {
+        X = (int)pos.X;
+        Y = (int)pos.Y;
+        Radius = radius;
+        Color = color;
+        OutlineThickness = Thickness;
+    }
+
     /// <summary>
     /// Returns a value that indicates whether the specified circle intersects with this circle.
     /// </summary>

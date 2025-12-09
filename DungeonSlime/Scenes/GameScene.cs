@@ -196,8 +196,8 @@ public class GameScene : Scene
         // register handlers
         Core.Cols.RegisterExitHandler(0, 1, (in CollisionSystem.CollisionInfo info) => exitCollisionAction());
         Core.Cols.RegisterEnterHandler(0, 3, (in CollisionSystem.CollisionInfo info) => exitCollisionAction());
-        Core.Cols.RegisterEnterHandler(0, 2, (in CollisionSystem.CollisionInfo info) => OnEnterEnemy());
-        boxColliderId = Core.Cols.CreateBox(Core.Viewport * 0.5f, new Vector2(940, 520), layer: 1);
+        //Core.Cols.RegisterEnterHandler(0, 2, (in CollisionSystem.CollisionInfo info) => OnEnterEnemy());
+        boxColliderId = Core.Cols.CreateBox(Core.Viewport * 0.5f, new Vector2(940, 520), layer: 1, this);
 
         // If you changed handlers after creation, no additional call needed because Register updates internal flags
     }
@@ -239,9 +239,9 @@ public class GameScene : Scene
 
 
         // Update the slime.
+        Core.Cols.ProcessCollisions();
         _player.Update(gameTime);
         _enemyMeneger.Update();
-        Core.Cols.ProcessCollisions();
         if (_player.Hp <= 0)
         {
             GameOver();

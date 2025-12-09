@@ -37,7 +37,8 @@ public class Player : GameObject
         Hp = MaxHp;
         Pos = Core.Viewport;
         Core.Cam.Position = Pos;
-        ColliderId = Core.Cols.CreateCircle(Pos + Sprite.Scale * 0.5f, 60f, 0, new Color(10, 243, 10, 170)); // player - layer 0
+        ColliderId = Core.Cols.CreateCircle(Pos + Sprite.Scale * 0.5f, 60f, 0, new Color(10, 243, 10, 170), this); // player - layer 0
+        Core.Cols.RegisterHandlerByLayer<IEnemy>(2, ColliderId, e => new Action(e.Hit));
     }
 
     private void HandleInput()

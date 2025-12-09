@@ -4,6 +4,7 @@ using MonoGameLibrary.Graphics;
 using MonoGameLibrary.Phisics;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,7 +16,7 @@ public interface IEnemy
     bool Active { get; }
     public void Initialize()
     {
-        Core.Cols.RegisterHandler(0, 2, (in CollisionSystem.CollisionInfo info) => Hit());
+
     }
 
     void Activate() { }
@@ -37,6 +38,6 @@ public interface IEnemy
 
     void Hit()
     {
-
+        Debug.WriteLine("Не то");
     }
 }

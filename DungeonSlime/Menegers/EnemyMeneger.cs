@@ -15,7 +15,8 @@ internal class EnemyMeneger
 {
     private Player _player;
     public List<IEnemy> Enemies;
-    private Sprite _commonEnemySprite;
+    private Sprite _commonSlimeSprite;
+    private Sprite _strongSlimeSprite;
 
     public EnemyMeneger(Player player)
     {
@@ -30,18 +31,32 @@ internal class EnemyMeneger
     public void LoadContent()
     {
         TextureAtlas atlas = TextureAtlas.FromFile(Core.Content, "Generated/atlas.xml");
-        _commonEnemySprite = atlas.CreateSprite("HZ-08");
-        _commonEnemySprite.CenterOrigin();
-        _commonEnemySprite.Scale = Vector2.One * 0.25f;
-        _commonEnemySprite.Color = Color.Green;
+        _commonSlimeSprite = atlas.CreateSprite("HZ-08");
+        _commonSlimeSprite.CenterOrigin();
+        _commonSlimeSprite.Scale = Vector2.One * 0.25f;
+        _commonSlimeSprite.Color = Color.Green;
+
+        _strongSlimeSprite = atlas.CreateSprite("HZ-08");
+        _strongSlimeSprite.CenterOrigin();
+        _strongSlimeSprite.Scale = Vector2.One * 0.25f;
+        _strongSlimeSprite.Color = Color.Red;
 
         Random rnd = new Random();
 
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < 3; i++)
         {
-            var slime = Create<CommonSlime>();
-            slime.Activate();
-            slime.Initialize(_player, _commonEnemySprite, new Vector2(
+            var commonSlime = Create<CommonSlime>();
+            commonSlime.Activate();
+            commonSlime.Initialize(_player, _commonSlimeSprite, new Vector2(
+                50f + (float)rnd.NextDouble() * 1820f,  // 1870 - 50
+                50f + (float)rnd.NextDouble() * 980f   // 1030 - 50
+                ));
+        }
+        for (int i = 0; i < 3; i++)
+        {
+            var strongSlime = Create<StrongSlime>();
+            strongSlime.Activate();
+            strongSlime.Initialize(_player, _strongSlimeSprite, new Vector2(
                 50f + (float)rnd.NextDouble() * 1820f,  // 1870 - 50
                 50f + (float)rnd.NextDouble() * 980f   // 1030 - 50
                 ));

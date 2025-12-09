@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace DungeonSlime.GameObjects;
 
-public class CommonSlime : GameObject, IEnemy
+public class StrongSlime : GameObject, IEnemy
 {
     public bool Active { get; private set; }
     public Sprite Sprite { get; private set; }
@@ -20,12 +20,7 @@ public class CommonSlime : GameObject, IEnemy
     private Vector2 _vel;
     private float _speed;
     public float Damage;
-
-    static CommonSlime()
-    {
-
-    }
-    public CommonSlime()
+    public StrongSlime()
     {
 
     }
@@ -33,8 +28,8 @@ public class CommonSlime : GameObject, IEnemy
     public void Initialize(Player player, Sprite sprite, Vector2 pos)
     {
         Sprite = sprite;
-        _speed = 2.0f;
-        Damage = 1f;
+        _speed = 1.0f;
+        Damage = 2f;
         _player = player;
         Pos = pos;
         ColliderId = Core.Cols.CreateCircle(Pos, 28f, 2, new Color(243, 10, 10, 170), this); // enemy - layer 2
@@ -66,7 +61,7 @@ public class CommonSlime : GameObject, IEnemy
             (int)(Pos.X + (Sprite.Width * 0.5f)),
             (int)(Pos.Y + (Sprite.Height * 0.5f)),
             (int)(Sprite.Width * 0.5f),
-            new Color(10, 243, 10, 170),
+            Sprite.Color,
             15
         );
 

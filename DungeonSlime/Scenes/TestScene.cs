@@ -49,10 +49,10 @@ namespace DungeonSlime.Scenes
             combinedEffect = Content.Load<Effect>("CombinedPost");
             Core.Cam.Position = Core.Viewport * 0.5f;
             _pos = Core.Viewport * 0.5f;
-            _playerId = Core.Cols.CreateCircle(Core.Viewport * 0.5f, 80, layer: 0, Color.DarkSlateBlue);
-            _boxId = Core.Cols.CreateBox(Core.Viewport * 0.33f, new Vector2(300, 300), layer: 1);
-            _circle1Id = Core.Cols.CreateCircle(Vector2.Zero, 100, layer: 2, Color.White);
-            _circle2Id = Core.Cols.CreateCircle(Core.Viewport * 0.55f, 100, layer: 3, Color.White);
+            _playerId = Core.Cols.CreateCircle(Core.Viewport * 0.5f, 80, layer: 0, Color.DarkSlateBlue, this);
+            _boxId = Core.Cols.CreateBox(Core.Viewport * 0.33f, new Vector2(300, 300), layer: 1, this);
+            _circle1Id = Core.Cols.CreateCircle(Vector2.Zero, 100, layer: 2, Color.White, this);
+            _circle2Id = Core.Cols.CreateCircle(Core.Viewport * 0.55f, 100, layer: 3, Color.White, this);
             Core.Cols.RegisterEnterHandler(0, 1, (in CollisionSystem.CollisionInfo info) => EnterBox());
             Core.Cols.RegisterEnterHandler(0, 2, (in CollisionSystem.CollisionInfo info) => EnterCircle());
             Core.Cols.RegisterExitHandler(0, 1, (in CollisionSystem.CollisionInfo info) => ExitBox());
@@ -66,7 +66,6 @@ namespace DungeonSlime.Scenes
 
         public override void Update(GameTime gameTime)
         {
-            Debug.WriteLine(gameTime.TotalGameTime.ToString());
             Core.Cols.SetPosition(_playerId, _pos);
             Core.Cols.SetPosition(_circle1Id, Core.Viewport * 0.5f + Vector2.UnitX * (float)Math.Cos(gameTime.TotalGameTime.TotalSeconds * 2) * 200 + Vector2.UnitY * (float)Math.Sin(gameTime.TotalGameTime.TotalSeconds * 2) * 200);
             Core.Cols.SetPosition(_circle2Id, Core.Viewport * 0.5f + Vector2.UnitX * (float)Math.Cos(gameTime.TotalGameTime.TotalSeconds * 4) * 150 + Vector2.UnitY * (float)Math.Sin(gameTime.TotalGameTime.TotalSeconds * 4) * 150);

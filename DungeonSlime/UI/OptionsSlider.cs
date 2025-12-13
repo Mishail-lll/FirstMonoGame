@@ -55,9 +55,9 @@ public class OptionsSlider : Slider
 
         // Create the title text element
         _textInstance = new TextRuntime();
-        _textInstance.CustomFontFile = @"fonts/04b_30.fnt";
+        _textInstance.CustomFontFile = @"fonts/Blex.fnt";
         _textInstance.UseCustomFont = true;
-        _textInstance.FontScale = 0.5f;
+        _textInstance.FontScale = 0.25f;
         _textInstance.Text = "Replace Me";
         _textInstance.X = 10f;
         _textInstance.Y = 10f;
@@ -141,8 +141,8 @@ public class OptionsSlider : Slider
         offText.Red = 70;
         offText.Green = 86;
         offText.Blue = 130;
-        offText.CustomFontFile = @"fonts/04b_30.fnt";
-        offText.FontScale = 0.25f;
+        offText.CustomFontFile = @"fonts/Blex.fnt";
+        offText.FontScale = 0.125f;
         offText.UseCustomFont = true;
         offText.Text = min;
         offText.Anchor(Gum.Wireframe.Anchor.Center);
@@ -153,8 +153,8 @@ public class OptionsSlider : Slider
         maxText.Red = 70;
         maxText.Green = 86;
         maxText.Blue = 130;
-        maxText.CustomFontFile = @"fonts/04b_30.fnt";
-        maxText.FontScale = 0.25f;
+        maxText.CustomFontFile = @"fonts/Blex.fnt";
+        maxText.FontScale = 0.125f;
         maxText.UseCustomFont = true;
         maxText.Text = max;
         maxText.Anchor(Gum.Wireframe.Anchor.Center);

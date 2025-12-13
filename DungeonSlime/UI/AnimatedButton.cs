@@ -49,8 +49,8 @@ internal class AnimatedButton : Button
         textInstance.Green = G;
         textInstance.Red = R;
         textInstance.UseCustomFont = true;
-        textInstance.CustomFontFile = "fonts/04b_30.fnt";
-        textInstance.FontScale = fontScale;
+        textInstance.CustomFontFile = "fonts/Blex.fnt";
+        textInstance.FontScale = fontScale * 0.5f;
         textInstance.Anchor(Gum.Wireframe.Anchor.Center);
         textInstance.Width = 0;
         textInstance.WidthUnits = DimensionUnitType.RelativeToChildren;

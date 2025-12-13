@@ -20,10 +20,10 @@ public class Core : Game
     public static Core Instance => s_instance;
 
     // The scene that is currently active.
-    private static Scene s_activeScene;
+    public static Scene ActiveScene { get; private set; }
 
     // The next scene to switch to, if there is one.
-    private static Scene s_nextScene;
+    private static Scene NextScene;
 
     /// <summary>
     /// Gets the graphics device manager to control the presentation of graphics.
@@ -166,15 +166,15 @@ public class Core : Game
 
         // if there is a next scene waiting to be switch to, then transition
         // to that scene.
-        if (s_nextScene != null)
+        if (NextScene != null)
         {
             TransitionScene();
         }
 
         // If there is an active scene, update it.
-        if (s_activeScene != null)
+        if (ActiveScene != null)
         {
-            s_activeScene.Update(gameTime);
+            ActiveScene.Update(gameTime);
         }
 
         base.Update(gameTime);
@@ -183,9 +183,9 @@ public class Core : Game
     protected override void Draw(GameTime gameTime)
     {
         // If there is an active scene, draw it.
-        if (s_activeScene != null)
+        if (ActiveScene != null)
         {
-            s_activeScene.Draw(gameTime);
+            ActiveScene.Draw(gameTime);
         }
 
         base.Draw(gameTime);
@@ -195,35 +195,35 @@ public class Core : Game
     {
         // Only set the next scene value if it is not the same
         // instance as the currently active scene.
-        if (s_activeScene != next)
+        if (ActiveScene != next)
         {
-            s_nextScene = next;
+            NextScene = next;
         }
     }
 
     private static void TransitionScene()
     {
         // If there is an active scene, dispose of it.
-        if (s_activeScene != null)
+        if (ActiveScene != null)
         {
-            s_activeScene.Dispose();
+            ActiveScene.Dispose();
         }
 
         // Force the garbage collector to collect to ensure memory is cleared.
         GC.Collect();
 
         // Change the currently active scene to the new scene.
-        s_activeScene = s_nextScene;
+        ActiveScene = NextScene;
 
         // Null out the next scene value so it does not trigger a change over and over.
-        s_nextScene = null;
+        NextScene = null;
 
         // If the active scene now is not null, initialize it.
         // Remember, just like with Game, the Initialize call also calls the
         // Scene.LoadContent
-        if (s_activeScene != null)
+        if (ActiveScene != null)
         {
-            s_activeScene.Initialize();
+            ActiveScene.Initialize();
         }
     }
 }

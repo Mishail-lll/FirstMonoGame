@@ -1,11 +1,12 @@
-﻿using System;
+﻿using DungeonSlime.Scenes;
+using Microsoft.Xna.Framework;
+using MonoGameLibrary;
+using MonoGameLibrary.Graphics;
+using MonoGameLibrary.Input;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using Microsoft.Xna.Framework;
-using MonoGameLibrary;
-using MonoGameLibrary.Input;
-using MonoGameLibrary.Graphics;
 
 
 namespace DungeonSlime.GameObjects;
@@ -52,6 +53,7 @@ public class Player : GameObject
     }
 
 
+
     private void Move()
     {
         Pos += _vel * _speed;
@@ -67,6 +69,10 @@ public class Player : GameObject
         // Update the animated sprite.
         Sprite.Update(gameTime);
 
+        if (Hp <= 0)
+        {
+            ((GameScene)Core.ActiveScene).GameOver();
+        }
         // Handle any player input
         HandleInput();
 
@@ -89,10 +95,10 @@ public class Player : GameObject
 
         // Create the bounds using the calculated visual position of the head.
         Circle bounds = new Circle(
-            (int)(Pos.X + (Sprite.Width * 0.5f)),
-            (int)(Pos.Y + (Sprite.Height * 0.5f)),
+            (int)(Pos.X),
+            (int)(Pos.Y),
             (int)(Sprite.Width * 0.5f),
-            new Color(10, 243, 10, 170),
+            Color.Green,
             15
         );
 
@@ -102,5 +108,10 @@ public class Player : GameObject
     public void GetDamage(float Damage, DamageType type)
     {
         Hp -= Damage;
+    }
+
+    public void FillHp()
+    {
+        Hp = MaxHp;
     }
 }

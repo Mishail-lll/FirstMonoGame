@@ -96,8 +96,8 @@ public class GameSceneUI : ContainerRuntime
         text.X = 20.0f;
         text.Y = 5.0f;
         text.UseCustomFont = true;
-        text.CustomFontFile = @"fonts/04b_30.fnt";
-        text.FontScale = 0.25f;
+        text.CustomFontFile = @"fonts/Blex.fnt";
+        text.FontScale = 0.125f;
         text.Text = string.Format(s_scoreFormat, 0);
 
         return text;
@@ -128,8 +128,8 @@ public class GameSceneUI : ContainerRuntime
         TextRuntime text = new TextRuntime();
         text.Text = "PAUSED";
         text.UseCustomFont = true;
-        text.CustomFontFile = "fonts/04b_30.fnt";
-        text.FontScale = 0.5f;
+        text.CustomFontFile = "fonts/Blex.fnt";
+        text.FontScale = 0.25f;
         text.X = 10.0f;
         text.Y = 10.0f;
         panel.AddChild(text);
@@ -185,8 +185,8 @@ public class GameSceneUI : ContainerRuntime
         text.Text = "GAME OVER";
         text.WidthUnits = DimensionUnitType.RelativeToChildren;
         text.UseCustomFont = true;
-        text.CustomFontFile = "fonts/04b_30.fnt";
-        text.FontScale = 0.5f;
+        text.CustomFontFile = "fonts/Blex.fnt";
+        text.FontScale = 0.25f;
         text.X = 10.0f;
         text.Y = 10.0f;
         panel.AddChild(text);

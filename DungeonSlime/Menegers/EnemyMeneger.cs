@@ -17,6 +17,11 @@ internal class EnemyMeneger
     public List<IEnemy> Enemies;
     private Sprite _commonSlimeSprite;
     private Sprite _strongSlimeSprite;
+    private Sprite _bulletSprite;
+    private float _timer = 0;
+    private float Interval = 1;
+
+    private const float STEP = 0.016f;
 
     public EnemyMeneger(Player player)
     {
@@ -41,30 +46,35 @@ internal class EnemyMeneger
         _strongSlimeSprite.Scale = Vector2.One * 0.25f;
         _strongSlimeSprite.Color = Color.Red;
 
-        Random rnd = new Random();
+        _bulletSprite = atlas.CreateSprite("HZ-02");
+        _bulletSprite.CenterOrigin();
+        _bulletSprite.Scale = Vector2.One * 0.25f;
+    }
 
-        for (int i = 0; i < 3; i++)
+    public void Update()
+    {
+        _timer += STEP;
+        if (_timer >= Interval)
         {
+
+            Random rnd = new Random();
+
             var commonSlime = Create<CommonSlime>();
             commonSlime.Activate();
             commonSlime.Initialize(_player, _commonSlimeSprite, new Vector2(
                 50f + (float)rnd.NextDouble() * 1820f,  // 1870 - 50
                 50f + (float)rnd.NextDouble() * 980f   // 1030 - 50
                 ));
-        }
-        for (int i = 0; i < 3; i++)
-        {
             var strongSlime = Create<StrongSlime>();
             strongSlime.Activate();
             strongSlime.Initialize(_player, _strongSlimeSprite, new Vector2(
                 50f + (float)rnd.NextDouble() * 1820f,  // 1870 - 50
                 50f + (float)rnd.NextDouble() * 980f   // 1030 - 50
                 ));
-        }
-    }
 
-    public void Update()
-    {
+            _timer -= Interval;
+            Interval *= 0.95f;
+        }
         foreach (IEnemy enemy in Enemies)
         {
             if (enemy.Active)
@@ -78,6 +88,17 @@ internal class EnemyMeneger
             if (enemy.Active)
                 ((GameObject)enemy).Draw();
         }
+    }
+
+    public List<Circle> GetBounds()
+    {
+        List<Circle> bounds = new List<Circle>();
+        foreach (IEnemy enemy in Enemies)
+        {
+            if (enemy.Active)
+                bounds.Add(enemy.GetBounds());
+        }
+        return bounds;
     }
 
     public T Create<T>() where T : IEnemy, new()

@@ -20,6 +20,7 @@ public interface IEnemy
     }
 
     void Activate() { }
+    void Despawn() { }
 
     public void Update() { }
 

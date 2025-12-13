@@ -1,16 +1,5 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<XnaContent xmlns:Graphics="Microsoft.Xna.Framework.Content.Pipeline.Graphics">
-	<Asset Type="Graphics:FontDescription">
-		<FontName>04B_30.ttf</FontName>
-		<Size>87.5</Size>
-		<Spacing>0</Spacing>
-		<UseKerning>true</UseKerning>
-		<Style>Regular</Style>
-		<CharacterRegions>
-			<CharacterRegion>
-				<Start>&#32;</Start>
-				<End>&#126;</End>
-			</CharacterRegion>
-		</CharacterRegions>
-	</Asset>
-</XnaContent>
+﻿<?xml version="1.0" encoding="utf-8"?><XnaContent xmlns:Graphics="Microsoft.Xna.Framework.Content.Pipeline.Graphics">    <Asset Type="Graphics:FontDescription">        <FontName>Blex.ttf</FontName>        <Size>87</Size>        <Spacing>0</Spacing>        <UseKerning>true</UseKerning>        <Style>Regular</Style>        <CharacterRegions>            <CharacterRegion>                <Start>&#32;</Start>                <End>&#126;</End>            </CharacterRegion>     
+<CharacterRegion>
+        <Start>1024</Start>
+        <End>1279</End>
+      </CharacterRegion>   </CharacterRegions>    </Asset></XnaContent>

@@ -58,10 +58,10 @@ public class StrongSlime : GameObject, IEnemy
 
         // Create the bounds using the calculated visual position of the head.
         Circle bounds = new Circle(
-            (int)(Pos.X + (Sprite.Width * 0.5f)),
-            (int)(Pos.Y + (Sprite.Height * 0.5f)),
+            (int)Pos.X,
+            (int)Pos.Y,
             (int)(Sprite.Width * 0.5f),
-            Sprite.Color,
+            Color.Red,
             15
         );
 

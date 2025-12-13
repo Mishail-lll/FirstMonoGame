@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework;
 using MonoGameLibrary;
 using MonoGameLibrary.Graphics;
 using MonoGameLibrary.Phisics;
+using DungeonSlime.Scenes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,8 +16,8 @@ public class CommonSlime : GameObject, IEnemy
 {
     public bool Active { get; private set; }
     public Sprite Sprite { get; private set; }
-    private Player _player;
     public int ColliderId { get; private set; }
+    private Player _player;
     private Vector2 _vel;
     private float _speed;
     public float Damage;
@@ -63,10 +64,10 @@ public class CommonSlime : GameObject, IEnemy
 
         // Create the bounds using the calculated visual position of the head.
         Circle bounds = new Circle(
-            (int)(Pos.X + (Sprite.Width * 0.5f)),
-            (int)(Pos.Y + (Sprite.Height * 0.5f)),
+            (int)Pos.X,
+            (int)Pos.Y,
             (int)(Sprite.Width * 0.5f),
-            new Color(10, 243, 10, 170),
+            Color.Red,
             15
         );
 
@@ -75,6 +76,7 @@ public class CommonSlime : GameObject, IEnemy
 
     public void Hit()
     {
+        ((GameScene)Core.ActiveScene).NauseaPower = 0.2f;
         _player.GetDamage(Damage, Player.DamageType.Male);
         Core.Audio.PlaySoundEffectByKey("collect");
         Despawn();

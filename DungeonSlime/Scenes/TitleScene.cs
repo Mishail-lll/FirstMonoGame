@@ -164,17 +164,17 @@ public class TitleScene : Scene
 
             // Draw the Dungeon text slightly offset from it is original position and
             // with a transparent color to give it a drop shadow
-            Core.SpriteBatch.DrawString(_font5x, DUNGEON_TEXT, _dungeonTextPos + new Vector2(10, 10), dropShadowColor, 0.0f, _dungeonTextOrigin, 1.0f, SpriteEffects.None, 1.0f);
+            Core.SpriteBatch.DrawString(_font5x, DUNGEON_TEXT, _dungeonTextPos + new Vector2(10, 10), dropShadowColor, 0.0f, _dungeonTextOrigin, 1f, SpriteEffects.None, 1.0f);
 
             // Draw the Dungeon text on top of that at its original position
-            Core.SpriteBatch.DrawString(_font5x, DUNGEON_TEXT, _dungeonTextPos, Color.White, 0.0f, _dungeonTextOrigin, 1.0f, SpriteEffects.None, 1.0f);
+            Core.SpriteBatch.DrawString(_font5x, DUNGEON_TEXT, _dungeonTextPos, Color.White, 0.0f, _dungeonTextOrigin, 1f, SpriteEffects.None, 1.0f);
 
             // Draw the Player text slightly offset from it is original position and
             // with a transparent color to give it a drop shadow
-            Core.SpriteBatch.DrawString(_font5x, SLIME_TEXT, _slimeTextPos + new Vector2(10, 10), dropShadowColor, 0.0f, _slimeTextOrigin, 1.0f, SpriteEffects.None, 1.0f);
+            Core.SpriteBatch.DrawString(_font5x, SLIME_TEXT, _slimeTextPos + new Vector2(10, 10), dropShadowColor, 0.0f, _slimeTextOrigin, 1f, SpriteEffects.None, 1.0f);
 
             // Draw the Player text on top of that at its original position
-            Core.SpriteBatch.DrawString(_font5x, SLIME_TEXT, _slimeTextPos, Color.White, 0.0f, _slimeTextOrigin, 1.0f, SpriteEffects.None, 1.0f);
+            Core.SpriteBatch.DrawString(_font5x, SLIME_TEXT, _slimeTextPos, Color.White, 0.0f, _slimeTextOrigin, 1f, SpriteEffects.None, 1.0f);
 
             // Always end the sprite batch when finished.
             Core.SpriteBatch.End();
@@ -195,7 +195,7 @@ public class TitleScene : Scene
         _optionsButton.Anchor(Gum.Wireframe.Anchor.BottomLeft);
         _optionsButton.Visual.X = 50;
         _optionsButton.Visual.Y = -12;
-        _optionsButton.Text = "Options";
+        _optionsButton.Text = "options";
         _optionsButton.Click += HandleOptionsClicked;
         _titleScreenButtonsPanel.AddChild(_optionsButton);
 
@@ -205,7 +205,7 @@ public class TitleScene : Scene
         startButton.Visual.Height = 20;
         startButton.Visual.X = 0;
         startButton.Visual.Y = -16;
-        startButton.Text = "Start";
+        startButton.Text = "start";
         startButton.Click += HandleStartClicked;
         _titleScreenButtonsPanel.AddChild(startButton);
 
@@ -213,7 +213,7 @@ public class TitleScene : Scene
         _exitButton.Anchor(Gum.Wireframe.Anchor.BottomRight);
         _exitButton.Visual.X = -50;
         _exitButton.Visual.Y = -12;
-        _exitButton.Text = "Exit";
+        _exitButton.Text = "exit";
         _exitButton.Click += HandleExitClicked;
         _titleScreenButtonsPanel.AddChild(_exitButton);
 
@@ -261,18 +261,18 @@ public class TitleScene : Scene
         optionsText.Y = 10;
         optionsText.Text = "OPTIONS";
         optionsText.UseCustomFont = true;
-        optionsText.FontScale = 0.5f;
-        optionsText.CustomFontFile = @"fonts/04b_30.fnt";
+        optionsText.FontScale = 0.25f;
+        optionsText.CustomFontFile = @"fonts/Blex.fnt";
         _optionsPanel.AddChild(optionsText);
 
         OptionsSlider musicSlider = new OptionsSlider(_atlas, "0%", "200%");
         musicSlider.Name = "MusicSlider";
-        musicSlider.Text = "MUSIC";
+        musicSlider.Text = "Music";
         musicSlider.Anchor(Gum.Wireframe.Anchor.Top);
         musicSlider.Visual.Y = 30f;
         musicSlider.Minimum = 0;
         musicSlider.Maximum = 1;
-        musicSlider.Value = 0.5f;
+        musicSlider.Value = Core.Audio.SongVolume;
         musicSlider.SmallChange = .1;
         musicSlider.LargeChange = .2;
         musicSlider.ValueChanged += HandleMusicSliderValueChanged;
@@ -286,7 +286,7 @@ public class TitleScene : Scene
         sfxSlider.Visual.Y = 93;
         sfxSlider.Minimum = 0;
         sfxSlider.Maximum = 1;
-        sfxSlider.Value = 0.5f;
+        sfxSlider.Value = Core.Audio.SoundEffectVolume;
         sfxSlider.SmallChange = .1;
         sfxSlider.LargeChange = .2;
         sfxSlider.ValueChanged += HandleSfxSliderChanged;

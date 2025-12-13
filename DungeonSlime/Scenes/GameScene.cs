@@ -29,7 +29,7 @@ public class GameScene : Scene
         Paused,
         GameOver
     }
-
+    public const float STEP = 0.016f;
     private Player _player;
 
     // Defines the tilemap to draw.
@@ -60,17 +60,19 @@ public class GameScene : Scene
 
     private float _width = 1920;
     private float _height = 1080;
+
     //Test
     int boxColliderId;
     static public readonly Queue<Action> _queue = new Queue<Action>();
 
-    void OnEnterEnemy()
-    {
-        Core.Audio.PlaySoundEffectByKey("collect");
-    }
+
+    //Effects
+    public float NauseaTime { get; private set; } = 0;
+    public float NauseaSmooth { get; private set; } = 0.0f;
+    public float NauseaPower = 0.0f;
+
     void exitCollisionAction()
     {
-        Core.Audio.PlaySoundEffectByKey("collect");
         GameOver();
     }
     public override void Initialize()
@@ -81,6 +83,16 @@ public class GameScene : Scene
         // During the game scene, we want to disable exit on escape. Instead,
         // the escape key will be used to return back to the title screen.
         Core.ExitOnEscape = false;
+
+
+        //Effect
+        NauseaTime = 0;
+        NauseaSmooth = 0;
+        NauseaPower = 0;
+        Core.Cam.ZoomX = 1;
+        Core.Cam.ZoomY = 1;
+        Core.Cam.Rotation = 0;
+
 
         // Create the room bounds by getting the bounds of the screen then
         // using the Inflate method to "Deflate" the bounds by the width and
@@ -101,9 +113,6 @@ public class GameScene : Scene
 
         // Initialize a new game to be played.
         InitializeNewGame();
-
-
-        Core.Cols.DebugDumpState();
     }
 
     private void InitializeUI()
@@ -132,6 +141,15 @@ public class GameScene : Scene
     {
         // Player has chosen to retry, so initialize a new game.
         InitializeNewGame();
+        _player.FillHp();
+
+        //Effects
+        NauseaTime = 0;
+        NauseaPower = 0;
+        NauseaSmooth = 0;
+        Core.Cam.ZoomX = 1;
+        Core.Cam.ZoomY = 1;
+        Core.Cam.Rotation = 0;
     }
 
     private void OnQuitButtonClicked(object sender, EventArgs args)
@@ -238,14 +256,21 @@ public class GameScene : Scene
         }
 
 
-        // Update the slime.
+        //Effects
+        if (NauseaPower > 0)
+        {
+            NauseaTime += STEP;
+            NauseaSmooth += STEP * 0.2f;
+            NauseaSmooth = Math.Min(NauseaSmooth, 1);
+            Core.Cam.Rotation = (float)Math.Cos(NauseaTime) * NauseaPower * NauseaSmooth;
+            Core.Cam.ZoomX = 1f - (float)Math.Cos(NauseaTime) * NauseaPower * NauseaSmooth;
+            Core.Cam.ZoomY = 1f - (float)Math.Sin(NauseaTime) * NauseaPower * NauseaSmooth;
+        }
+
+
         Core.Cols.ProcessCollisions();
         _player.Update(gameTime);
         _enemyMeneger.Update();
-        if (_player.Hp <= 0)
-        {
-            GameOver();
-        }
     }
 
     private void TogglePause()
@@ -272,7 +297,7 @@ public class GameScene : Scene
 
     }
 
-    private void GameOver()
+    public void GameOver()
     {
         // Show the game over panel.
         _ui.ShowGameOverPanel();
@@ -286,12 +311,8 @@ public class GameScene : Scene
 
     public override void Draw(GameTime gameTime)
     {
-        //Circle[] colliders = new Circle[] { _bat.GetBounds(), _player.GetBounds(), new Circle(200, 200, 100, new Color(100, 100, 100), 10) };
-        List<Circle> colliders = new List<Circle> { Core.Cols.GetBounds(_player.ColliderId) };
-        if (Core.Cols.ValidId(_enemyMeneger.Enemies[0].GetId()))
-        {
-            colliders.Add( Core.Cols.GetBounds(_enemyMeneger.Enemies[0].GetId()));
-        }
+        List<Circle> colliders = _enemyMeneger.GetBounds();
+        colliders.Add(_player.GetBounds());
         int count = Math.Min(colliders.Count, 48);
         Vector4[] data = new Vector4[count];    // CircleData packed
         Vector4[] cols = new Vector4[count];    // CircleColor
@@ -331,9 +352,9 @@ public class GameScene : Scene
         combinedEffect.Parameters["CircleData"].SetValue(data);
         combinedEffect.Parameters["CircleColor"].SetValue(cols);
         combinedEffect.Parameters["ShowCollision"].SetValue(true);
-
         // 3) Drow the effects
-        Core.SpriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, null, null, null, combinedEffect);
+        //Core.SpriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, null, null, null, combinedEffect);
+        Core.SpriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, null, null, null, null);
         Core.SpriteBatch.Draw(Core.SceneTarget, new Rectangle(0, 0, Core.GraphicsDevice.Viewport.Width, Core.GraphicsDevice.Viewport.Height), Color.White);
         Core.SpriteBatch.End();
 

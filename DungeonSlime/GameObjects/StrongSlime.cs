@@ -1,4 +1,5 @@
 ﻿
+using DungeonSlime.Effects;
 using Microsoft.Xna.Framework;
 using MonoGameLibrary;
 using MonoGameLibrary.Graphics;
@@ -15,6 +16,7 @@ public class StrongSlime : GameObject, IEnemy
 {
     public bool Active { get; private set; }
     public Sprite Sprite { get; private set; }
+    public IEffect Effect { get; private set; }
     private Player _player;
     public int ColliderId { get; private set; }
     private Vector2 _vel;
@@ -33,6 +35,7 @@ public class StrongSlime : GameObject, IEnemy
         _player = player;
         Pos = pos;
         ColliderId = Core.Cols.CreateCircle(Pos, 28f, 2, new Color(243, 10, 10, 170), this); // enemy - layer 2
+        Effect = new BleedingEffect(_player);
     }
 
     public override void Update()
@@ -70,6 +73,7 @@ public class StrongSlime : GameObject, IEnemy
 
     public void Hit()
     {
+        _player.GetEffect(Effect);
         _player.GetDamage(Damage, Player.DamageType.Male);
         Core.Audio.PlaySoundEffectByKey("collect");
         Despawn();

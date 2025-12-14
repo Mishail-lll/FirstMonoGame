@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DungeonSlime.Effects;
 
 namespace DungeonSlime.GameObjects;
 
@@ -17,6 +18,7 @@ public class CommonSlime : GameObject, IEnemy
     public bool Active { get; private set; }
     public Sprite Sprite { get; private set; }
     public int ColliderId { get; private set; }
+    public IEffect Effect { get; private set; }
     private Player _player;
     private Vector2 _vel;
     private float _speed;
@@ -39,6 +41,7 @@ public class CommonSlime : GameObject, IEnemy
         _player = player;
         Pos = pos;
         ColliderId = Core.Cols.CreateCircle(Pos, 28f, 2, new Color(243, 10, 10, 170), this); // enemy - layer 2
+        Effect = new NauseaEffect(_player);
     }
 
     public override void Update()
@@ -76,7 +79,7 @@ public class CommonSlime : GameObject, IEnemy
 
     public void Hit()
     {
-        ((GameScene)Core.ActiveScene).NauseaPower = 0.2f;
+        _player.GetEffect(Effect);
         _player.GetDamage(Damage, Player.DamageType.Male);
         Core.Audio.PlaySoundEffectByKey("collect");
         Despawn();

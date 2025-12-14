@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework;
 using MonoGameLibrary;
 using MonoGameLibrary.Graphics;
+using MonoGameLibrary.Phisics;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -18,10 +19,8 @@ internal class EnemyMeneger
     private Sprite _commonSlimeSprite;
     private Sprite _strongSlimeSprite;
     private Sprite _bulletSprite;
-    private float _timer = 0;
-    private float Interval = 1;
-
-    private const float STEP = 0.016f;
+    private float _timer = 4;
+    private float Interval = 4;
 
     public EnemyMeneger(Player player)
     {
@@ -53,7 +52,7 @@ internal class EnemyMeneger
 
     public void Update()
     {
-        _timer += STEP;
+        _timer += Core.Step;
         if (_timer >= Interval)
         {
 

@@ -1,5 +1,7 @@
-﻿using DungeonSlime.Scenes;
+﻿using DungeonSlime.Effects;
+using DungeonSlime.Scenes;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using MonoGameLibrary;
 using MonoGameLibrary.Graphics;
 using MonoGameLibrary.Input;
@@ -17,9 +19,12 @@ public class Player : GameObject
     // The AnimatedSprite used when drawing each slime segment
     public AnimatedSprite Sprite { get; private set; }
 
+    public List<IEffect> Effects { get; private set; } = new List<IEffect>();
+    private List<string> _effectNames = new List<string>();
     public enum DamageType
     {
-        Male
+        Male,
+        Poison
     }
     public int ColliderId { get; private set; }
     public float Hp { get; private set; }
@@ -69,6 +74,17 @@ public class Player : GameObject
         // Update the animated sprite.
         Sprite.Update(gameTime);
 
+        for (int i = Effects.Count - 1; i >= 0; i--)
+        {
+            Effects[i].Update();
+
+            if (Effects[i].Power <= 0)
+            {
+                Effects.RemoveAt(i);
+                _effectNames.RemoveAt(i);
+            }
+        }
+
         if (Hp <= 0)
         {
             ((GameScene)Core.ActiveScene).GameOver();
@@ -113,5 +129,25 @@ public class Player : GameObject
     public void FillHp()
     {
         Hp = MaxHp;
+    }
+
+    public void GetEffect(IEffect effect)
+    {
+        if (!_effectNames.Contains(effect.Name))
+        {
+            Effects.Add(effect);
+            _effectNames.Add(effect.Name);
+            effect.Initialize();
+        }
+    }
+
+    public void ClearEffects()
+    {
+        foreach (var e in Effects)
+        {
+            e.Clear();
+        }
+        Effects = new List<IEffect>();
+        _effectNames = new List<string>();
     }
 }

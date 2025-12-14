@@ -29,7 +29,6 @@ public class GameScene : Scene
         Paused,
         GameOver
     }
-    public const float STEP = 0.016f;
     private Player _player;
 
     // Defines the tilemap to draw.
@@ -65,12 +64,6 @@ public class GameScene : Scene
     int boxColliderId;
     static public readonly Queue<Action> _queue = new Queue<Action>();
 
-
-    //Effects
-    public float NauseaTime { get; private set; } = 0;
-    public float NauseaSmooth { get; private set; } = 0.0f;
-    public float NauseaPower = 0.0f;
-
     void exitCollisionAction()
     {
         GameOver();
@@ -83,15 +76,6 @@ public class GameScene : Scene
         // During the game scene, we want to disable exit on escape. Instead,
         // the escape key will be used to return back to the title screen.
         Core.ExitOnEscape = false;
-
-
-        //Effect
-        NauseaTime = 0;
-        NauseaSmooth = 0;
-        NauseaPower = 0;
-        Core.Cam.ZoomX = 1;
-        Core.Cam.ZoomY = 1;
-        Core.Cam.Rotation = 0;
 
 
         // Create the room bounds by getting the bounds of the screen then
@@ -143,18 +127,13 @@ public class GameScene : Scene
         InitializeNewGame();
         _player.FillHp();
 
-        //Effects
-        NauseaTime = 0;
-        NauseaPower = 0;
-        NauseaSmooth = 0;
-        Core.Cam.ZoomX = 1;
-        Core.Cam.ZoomY = 1;
-        Core.Cam.Rotation = 0;
+
     }
 
     private void OnQuitButtonClicked(object sender, EventArgs args)
     {
         // Player has chosen to quit, so return back to the title scene.
+        _player.ClearEffects();
         Core.ChangeScene(new TitleScene());
     }
 
@@ -163,6 +142,7 @@ public class GameScene : Scene
         // Calculate the position for the slime, which will be at the center
         // tile of the tile map.
         _player.Pos = Core.Viewport * 0.5f;
+        _player.ClearEffects();
         Core.Cols.SetPosition(_player.ColliderId, new Vector2(_player.Pos.X + _player.Sprite.Width * 0.5f, _player.Pos.Y + _player.Sprite.Height * 0.5f));
         // Initialize the slime.
         // Initialize the bat.
@@ -206,6 +186,7 @@ public class GameScene : Scene
         combinedEffect = Content.Load<Effect>("CombinedPost");
 
         _player.Initialize();
+        _player.ClearEffects();
         _enemyMeneger.Initialize();
 
 
@@ -216,8 +197,6 @@ public class GameScene : Scene
         Core.Cols.RegisterEnterHandler(0, 3, (in CollisionSystem.CollisionInfo info) => exitCollisionAction());
         //Core.Cols.RegisterEnterHandler(0, 2, (in CollisionSystem.CollisionInfo info) => OnEnterEnemy());
         boxColliderId = Core.Cols.CreateBox(Core.Viewport * 0.5f, new Vector2(940, 520), layer: 1, this);
-
-        // If you changed handlers after creation, no additional call needed because Register updates internal flags
     }
 
 
@@ -253,18 +232,6 @@ public class GameScene : Scene
         if (_state == GameState.Paused)
         {
             return;
-        }
-
-
-        //Effects
-        if (NauseaPower > 0)
-        {
-            NauseaTime += STEP;
-            NauseaSmooth += STEP * 0.2f;
-            NauseaSmooth = Math.Min(NauseaSmooth, 1);
-            Core.Cam.Rotation = (float)Math.Cos(NauseaTime) * NauseaPower * NauseaSmooth;
-            Core.Cam.ZoomX = 1f - (float)Math.Cos(NauseaTime) * NauseaPower * NauseaSmooth;
-            Core.Cam.ZoomY = 1f - (float)Math.Sin(NauseaTime) * NauseaPower * NauseaSmooth;
         }
 
 

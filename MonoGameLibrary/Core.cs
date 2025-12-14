@@ -25,6 +25,7 @@ public class Core : Game
     // The next scene to switch to, if there is one.
     private static Scene NextScene;
 
+    public static float Step = 0.016f;
     /// <summary>
     /// Gets the graphics device manager to control the presentation of graphics.
     /// </summary>

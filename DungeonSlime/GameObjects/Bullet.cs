@@ -12,7 +12,7 @@ namespace DungeonSlime.GameObjects;
 
 public class Bullet : GameObject
 {
-    public int ColliderId { get; private set; }
+    public Collider Collider { get; private set; }
     public Sprite Sprite { get; private set; }
     private float Damage;
     private Vector2 _vel;
@@ -24,13 +24,13 @@ public class Bullet : GameObject
         Damage = 2f;
         _vel = Vector2.UnitX;
         Pos = pos;
-        ColliderId = Core.Cols.CreateCircle(Pos, 14f, 4, Color.Black, this); // enemy - layer 2
-        Core.Cols.RegisterHandlerByLayer<IEnemy>(2, ColliderId, e => new Action(e.Despawn));
+        Collider = Core.NewCols.CreateCircle(Pos, 14f, 4, Color.Black, this);
+        NewCollisionSystem.AddHandler<IEnemy>(ref Collider.EnterByLayer, 2, e => new Action(e.Despawn));
     }
     public override void Update()
     {
         Pos += _vel * _speed;
-        Core.Cols.SetPosition(ColliderId, Pos);
+        Core.NewCols.SetPosition(Collider, Pos);
     }
 
     public override void Draw()

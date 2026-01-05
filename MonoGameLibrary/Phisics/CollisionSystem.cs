@@ -137,11 +137,11 @@ namespace MonoGameLibrary.Phisics
         // ---------- Public API: Subscriptions ----------
 
         // Регистрация метода интерфейса без аргументов: e => e.Hit()
-        public void RegisterHandlerByLayer<TInterface>(
+        public void RegisterHandlerByLayer<TClass>(
         int layer,
         int id,
-        Func<TInterface, Action> methodSelector
-    ) where TInterface : class
+        Func<TClass, Action> methodSelector
+    ) where TClass : class
         {
             ValidateLayer(layer);
 
@@ -160,7 +160,7 @@ namespace MonoGameLibrary.Phisics
             Func<object, Action> wrapper = ownerObj =>
             {
                 // Кастуем владельца к интерфейсу
-                var typed = ownerObj as TInterface;
+                var typed = ownerObj as TClass;
                 if (typed == null)
                     return null; // владелец не того типа — обработчик не подходит
 

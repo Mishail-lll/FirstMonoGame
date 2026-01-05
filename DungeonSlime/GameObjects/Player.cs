@@ -3,6 +3,7 @@ using DungeonSlime.Scenes;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGameLibrary;
+using MonoGameLibrary.Phisics;
 using MonoGameLibrary.Graphics;
 using MonoGameLibrary.Input;
 using System;
@@ -26,7 +27,7 @@ public class Player : GameObject
         Male,
         Poison
     }
-    public int ColliderId { get; private set; }
+    public Collider Collider { get; private set; }
     public float Hp { get; private set; }
     public float MaxHp { get; private set; }
     private Vector2 _vel;
@@ -34,6 +35,10 @@ public class Player : GameObject
     public Player(AnimatedSprite sprite)
     {
         Sprite = sprite;
+    }
+    void GameOver()
+    {
+        ((GameScene)Core.ActiveScene).GameOver();
     }
 
     public void Initialize()
@@ -43,8 +48,11 @@ public class Player : GameObject
         Hp = MaxHp;
         Pos = Core.Viewport;
         Core.Cam.Position = Pos;
-        ColliderId = Core.Cols.CreateCircle(Pos + Sprite.Scale * 0.5f, 60f, 0, new Color(10, 243, 10, 170), this); // player - layer 0
-        Core.Cols.RegisterHandlerByLayer<IEnemy>(2, ColliderId, e => new Action(e.Hit));
+        //ColliderId = Core.Cols.CreateCircle(Pos + Sprite.Scale * 0.5f, 60f, 0, new Color(10, 243, 10, 170), this); // player - layer 0
+        //Core.Cols.RegisterHandlerByLayer<IEnemy>(2, ColliderId, e => new Action(e.Hit));
+        Collider = Core.NewCols.CreateCircle(Pos + Sprite.Scale * 0.5f, 60f, 0, new Color(10, 243, 10, 170), this);
+        NewCollisionSystem.AddHandler<IEnemy>(ref Collider.StayByLayer, 2, e => new Action(e.Hit));
+        NewCollisionSystem.AddHandler<GameScene>(ref Collider.ExitByLayer, 1, e => new Action(e.GameOver));
     }
 
     private void HandleInput()
@@ -87,13 +95,13 @@ public class Player : GameObject
 
         if (Hp <= 0)
         {
-            ((GameScene)Core.ActiveScene).GameOver();
+            GameOver();
         }
         // Handle any player input
         HandleInput();
 
         Move();
-        Core.Cols.SetPosition(ColliderId, Pos);
+        Core.NewCols.SetPosition(Collider, Pos);
 
     }
 

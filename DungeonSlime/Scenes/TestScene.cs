@@ -22,10 +22,11 @@ namespace DungeonSlime.Scenes
         Effect combinedEffect;
         float _saturation;
         Vector2 _pos;
-        int _boxId;
-        int _circle1Id;
-        int _playerId;
-        int _circle2Id;
+
+        Collider _playerCollider;
+        Collider _boxCollider;
+        Collider _circle1Collider;
+        Collider _circle2Collider;
         public override void Initialize()
         {
             sceneTarget = new RenderTarget2D(
@@ -48,27 +49,48 @@ namespace DungeonSlime.Scenes
             exampleSprite.Color = Color.White;
             combinedEffect = Content.Load<Effect>("CombinedPost");
             Core.Cam.Position = Core.Viewport * 0.5f;
-            _pos = Core.Viewport * 0.5f;
-            _playerId = Core.Cols.CreateCircle(Core.Viewport * 0.5f, 80, layer: 0, Color.DarkSlateBlue, this);
-            _boxId = Core.Cols.CreateBox(Core.Viewport * 0.33f, new Vector2(300, 300), layer: 1, this);
-            _circle1Id = Core.Cols.CreateCircle(Vector2.Zero, 100, layer: 2, Color.White, this);
-            _circle2Id = Core.Cols.CreateCircle(Core.Viewport * 0.55f, 100, layer: 3, Color.White, this);
-            Core.Cols.RegisterEnterHandler(0, 1, (in CollisionSystem.CollisionInfo info) => EnterBox());
-            Core.Cols.RegisterEnterHandler(0, 2, (in CollisionSystem.CollisionInfo info) => EnterCircle());
-            Core.Cols.RegisterExitHandler(0, 1, (in CollisionSystem.CollisionInfo info) => ExitBox());
-            Core.Cols.RegisterExitHandler(0, 2, (in CollisionSystem.CollisionInfo info) => ExitCircle());
+            _pos = Core.Viewport * 0.5f + Vector2.UnitX * 100;
 
-            Core.Cols.RegisterEnterHandler(2, 3, (in CollisionSystem.CollisionInfo info) => Core.Cols.SetColor(_circle2Id, Color.DeepPink));
-            Core.Cols.RegisterExitHandler(2, 3, (in CollisionSystem.CollisionInfo info) => Core.Cols.SetColor(_circle2Id, Color.White));
-            Core.Cols.RegisterEnterHandler(1, 2, (in CollisionSystem.CollisionInfo info) => exampleSprite.Color = Color.DeepPink);
-            Core.Cols.RegisterExitHandler(1, 2, (in CollisionSystem.CollisionInfo info) => exampleSprite.Color = Color.White);
+            _playerCollider = Core.NewCols.CreateCircle(Core.Viewport * 0.5f + Vector2.UnitX * 100, 80, 0, Color.DarkSlateBlue, this);
+            _boxCollider = Core.NewCols.CreateAABB(Core.Viewport * 0.33f, new Vector2(300, 300), 1, Color.White, this);
+            _circle1Collider = Core.NewCols.CreateCircle(Vector2.Zero, 100, 2, Color.White, this);
+            _circle2Collider = Core.NewCols.CreateCircle(Vector2.Zero, 100, 3, Color.White, this);
+
+            NewCollisionSystem.AddHandler<TestScene>(ref _playerCollider.EnterByLayer, 1, e => new Action(e.EnterBox));
+            NewCollisionSystem.AddHandler<TestScene>(ref _playerCollider.ExitByLayer, 1, e => new Action(e.ExitBox));
+            NewCollisionSystem.AddHandler<TestScene>(ref _playerCollider.EnterByLayer, 2, e => () => Core.NewCols.SetColor(_circle1Collider, Color.Red));
+            NewCollisionSystem.AddHandler<TestScene>(ref _playerCollider.ExitByLayer, 2, e => () => Core.NewCols.SetColor(_circle1Collider, Color.White));
+
+            NewCollisionSystem.AddHandler<TestScene>(ref _circle1Collider.EnterByLayer, 3, e => () => Core.NewCols.SetColor(_circle2Collider, Color.DeepPink));
+            NewCollisionSystem.AddHandler<TestScene>(ref _circle1Collider.ExitByLayer, 3, e => () => Core.NewCols.SetColor(_circle2Collider, Color.White));
+            NewCollisionSystem.AddHandler<TestScene>(ref _circle1Collider.EnterByLayer, 1, e => () => exampleSprite.Color = Color.DeepPink);
+            NewCollisionSystem.AddHandler<TestScene>(ref _circle1Collider.ExitByLayer, 1, e => () => exampleSprite.Color = Color.White);
+
+            ///-------------------------------------------------Old---------------------------------------------------
+            //_playerId = Core.Cols.CreateCircle(Core.Viewport * 0.5f, 80, layer: 0, Color.DarkSlateBlue, this);
+            //_boxId = Core.Cols.CreateBox(Core.Viewport * 0.33f, new Vector2(300, 300), layer: 1, this);
+            //_circle1Id = Core.Cols.CreateCircle(Vector2.Zero, 100, layer: 2, Color.White, this);
+            //_circle2Id = Core.Cols.CreateCircle(Core.Viewport * 0.55f, 100, layer: 3, Color.White, this);
+            //Core.Cols.RegisterEnterHandler(0, 1, (in CollisionSystem.CollisionInfo info) => EnterBox());
+            //Core.Cols.RegisterEnterHandler(0, 2, (in CollisionSystem.CollisionInfo info) => EnterCircle());
+            //Core.Cols.RegisterExitHandler(0, 1, (in CollisionSystem.CollisionInfo info) => ExitBox());
+            //Core.Cols.RegisterExitHandler(0, 2, (in CollisionSystem.CollisionInfo info) => ExitCircle());
+
+            //Core.Cols.RegisterEnterHandler(2, 3, (in CollisionSystem.CollisionInfo info) => Core.Cols.SetColor(_circle2Id, Color.DeepPink));
+            //Core.Cols.RegisterExitHandler(2, 3, (in CollisionSystem.CollisionInfo info) => Core.Cols.SetColor(_circle2Id, Color.White));
+            //Core.Cols.RegisterEnterHandler(1, 2, (in CollisionSystem.CollisionInfo info) => exampleSprite.Color = Color.DeepPink);
+            //Core.Cols.RegisterExitHandler(1, 2, (in CollisionSystem.CollisionInfo info) => exampleSprite.Color = Color.White);
         }
 
         public override void Update(GameTime gameTime)
         {
-            Core.Cols.SetPosition(_playerId, _pos);
-            Core.Cols.SetPosition(_circle1Id, Core.Viewport * 0.5f + Vector2.UnitX * (float)Math.Cos(gameTime.TotalGameTime.TotalSeconds * 2) * 200 + Vector2.UnitY * (float)Math.Sin(gameTime.TotalGameTime.TotalSeconds * 2) * 200);
-            Core.Cols.SetPosition(_circle2Id, Core.Viewport * 0.5f + Vector2.UnitX * (float)Math.Cos(gameTime.TotalGameTime.TotalSeconds * 4) * 150 + Vector2.UnitY * (float)Math.Sin(gameTime.TotalGameTime.TotalSeconds * 4) * 150);
+            Core.NewCols.SetPosition(_playerCollider, _pos);
+            Core.NewCols.SetPosition(_circle1Collider, Core.Viewport * 0.5f + Vector2.UnitX * (float)Math.Cos(gameTime.TotalGameTime.TotalSeconds * 2) * 200 + Vector2.UnitY * (float)Math.Sin(gameTime.TotalGameTime.TotalSeconds * 2) * 200);
+            Core.NewCols.SetPosition(_circle2Collider, Core.Viewport * 0.5f + Vector2.UnitX * (float)Math.Cos(gameTime.TotalGameTime.TotalSeconds * 4) * 150 + Vector2.UnitY * (float)Math.Sin(gameTime.TotalGameTime.TotalSeconds * 4) * 150);
+
+            //Core.Cols.SetPosition(_playerId, _pos);
+            //Core.Cols.SetPosition(_circle1Id, Core.Viewport * 0.5f + Vector2.UnitX * (float)Math.Cos(gameTime.TotalGameTime.TotalSeconds * 2) * 200 + Vector2.UnitY * (float)Math.Sin(gameTime.TotalGameTime.TotalSeconds * 2) * 200);
+            //Core.Cols.SetPosition(_circle2Id, Core.Viewport * 0.5f + Vector2.UnitX * (float)Math.Cos(gameTime.TotalGameTime.TotalSeconds * 4) * 150 + Vector2.UnitY * (float)Math.Sin(gameTime.TotalGameTime.TotalSeconds * 4) * 150);
             Vector2 _vel = Vector2.Zero;
             _vel += Vector2.UnitY * -Convert.ToInt32(GameController.MoveUp()) +
             Vector2.UnitY * Convert.ToInt32(GameController.MoveDown()) +
@@ -77,12 +99,17 @@ namespace DungeonSlime.Scenes
             _vel -= (_vel * Convert.ToInt32(_vel.X != 0 && _vel.Y != 0) * 0.27f);
             _pos += _vel * 8;
 
-            Core.Cols.ProcessCollisions();
+            if (GameController.JustAction())
+            {
+                Core.NewCols.SetActive(_circle1Collider, !_circle1Collider.Active);
+            }
+
+            Core.NewCols.Update();
         }
 
         public override void Draw(GameTime gameTime)
         {
-            List<Circle> colliders = new List<Circle> {Core.Cols.GetBounds(_playerId), Core.Cols.GetBounds(_circle1Id), Core.Cols.GetBounds(_circle2Id) };
+            List<Circle> colliders = new List<Circle> {_playerCollider.GetBounds(), _circle1Collider.GetBounds(), _circle2Collider.GetBounds() };
             int count = Math.Min(colliders.Count, 64);
             Vector4[] data = new Vector4[count];    // CircleData packed
             Vector4[] cols = new Vector4[count];    // CircleColor
@@ -130,19 +157,9 @@ namespace DungeonSlime.Scenes
             exampleSprite.Color = Color.White;
         }
 
-        void ExitCircle()
-        {
-            Core.Cols.SetColor(_circle1Id, Color.White);
-        }
-
         void EnterBox()
         {
             exampleSprite.Color = Color.Red;
-        }
-
-        void EnterCircle()
-        {
-            Core.Cols.SetColor(_circle1Id, Color.Red);
         }
     }
 }

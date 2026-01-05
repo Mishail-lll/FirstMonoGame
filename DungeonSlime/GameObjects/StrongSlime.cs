@@ -18,7 +18,7 @@ public class StrongSlime : GameObject, IEnemy
     public Sprite Sprite { get; private set; }
     public IEffect Effect { get; private set; }
     private Player _player;
-    public int ColliderId { get; private set; }
+    public Collider Collider { get; private set; }
     private Vector2 _vel;
     private float _speed;
     public float Damage;
@@ -34,14 +34,14 @@ public class StrongSlime : GameObject, IEnemy
         Damage = 2f;
         _player = player;
         Pos = pos;
-        ColliderId = Core.Cols.CreateCircle(Pos, 28f, 2, new Color(243, 10, 10, 170), this); // enemy - layer 2
+        Collider = Core.NewCols.CreateCircle(Pos, 28f, 2, new Color(243, 10, 10, 170), this); // enemy - layer 2
         Effect = new BleedingEffect(_player);
     }
 
     public override void Update()
     {
         // Handle any player input
-        Core.Cols.SetPosition(ColliderId, Pos);
+        Core.NewCols.SetPosition(Collider, Pos);
 
         _vel = Vector2.Normalize(_player.Pos - Pos);
 
@@ -81,13 +81,14 @@ public class StrongSlime : GameObject, IEnemy
 
     public int GetId()
     {
-        return ColliderId;
+        return Collider.Id;
     }
 
     public void Despawn()
     {
         Active = false;
-        Core.Cols.RemoveCollider(ColliderId);
+        //Core.NewCols.RemoveCollider(Collider.Id);
+        Core.NewCols.SetActive(Collider, false);
         _vel = Vector2.Zero;
         _speed = 0;
         Damage = 0;

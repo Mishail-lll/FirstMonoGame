@@ -60,7 +60,8 @@ public abstract class Scene : IDisposable
     public virtual void UnloadContent()
     {
         Content.Unload();
-        Core.Cols.RemoveAll();
+        //Core.Cols.RemoveAll();
+        Core.NewCols.RemoveAll();
     }
 
     /// <summary>

@@ -61,13 +61,8 @@ public class GameScene : Scene
     private float _height = 1080;
 
     //Test
-    int boxColliderId;
-    static public readonly Queue<Action> _queue = new Queue<Action>();
 
-    void exitCollisionAction()
-    {
-        GameOver();
-    }
+    private MonoGameLibrary.Phisics.Collider boxCollider;
     public override void Initialize()
     {
         // LoadContent is called during base.Initialize().
@@ -143,7 +138,7 @@ public class GameScene : Scene
         // tile of the tile map.
         _player.Pos = Core.Viewport * 0.5f;
         _player.ClearEffects();
-        Core.Cols.SetPosition(_player.ColliderId, new Vector2(_player.Pos.X + _player.Sprite.Width * 0.5f, _player.Pos.Y + _player.Sprite.Height * 0.5f));
+        Core.NewCols.SetPosition(_player.Collider, new Vector2(_player.Pos.X + _player.Sprite.Width * 0.5f, _player.Pos.Y + _player.Sprite.Height * 0.5f));
         // Initialize the slime.
         // Initialize the bat.
         // Reset the score.
@@ -193,10 +188,10 @@ public class GameScene : Scene
         //Test
         // init collision system: capacity 256, layers = 5 (0..4)
         // register handlers
-        Core.Cols.RegisterExitHandler(0, 1, (in CollisionSystem.CollisionInfo info) => exitCollisionAction());
-        Core.Cols.RegisterEnterHandler(0, 3, (in CollisionSystem.CollisionInfo info) => exitCollisionAction());
+        //Core.Cols.RegisterExitHandler(0, 1, (in CollisionSystem.CollisionInfo info) => GameOver());
+        //Core.Cols.RegisterEnterHandler(0, 3, (in CollisionSystem.CollisionInfo info) => GameOver());
         //Core.Cols.RegisterEnterHandler(0, 2, (in CollisionSystem.CollisionInfo info) => OnEnterEnemy());
-        boxColliderId = Core.Cols.CreateBox(Core.Viewport * 0.5f, new Vector2(940, 520), layer: 1, this);
+        boxCollider = Core.NewCols.CreateAABB(Core.Viewport * 0.5f, Core.Viewport * 0.5f, 1, Color.White, this);
     }
 
 
@@ -235,7 +230,8 @@ public class GameScene : Scene
         }
 
 
-        Core.Cols.ProcessCollisions();
+        //Core.Cols.ProcessCollisions();
+        Core.NewCols.Update();
         _player.Update(gameTime);
         _enemyMeneger.Update();
     }

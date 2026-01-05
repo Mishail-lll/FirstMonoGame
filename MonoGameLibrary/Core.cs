@@ -64,7 +64,9 @@ public class Core : Game
     /// </summary>
     public static AudioController Audio { get; private set; }
 
-    public static CollisionSystem Cols { get; private set; }
+    //public static CollisionSystem Cols { get; private set; }
+
+    public static NewCollisionSystem NewCols { get; private set; }
 
     /// <summary>
     /// Creates a new Core instance.
@@ -139,7 +141,8 @@ public class Core : Game
 
         Viewport = new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
         Cam = new Camera2D(1, 1, 0.0f);
-        Cols = new CollisionSystem(initialCapacity: 256, maxLayers: 5);
+        //Cols = new CollisionSystem(initialCapacity: 256, maxLayers: 5);
+        NewCols = new NewCollisionSystem();
     }
 
     

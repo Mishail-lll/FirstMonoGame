@@ -103,14 +103,14 @@ public class TitleScene : Scene
         // screen background.
         _backgroundDestination = Core.GraphicsDevice.PresentationParameters.Bounds;
 
-        Core.Cols.UnregisterAllHendlers();
-
+        //Core.Cols.UnregisterAllHendlers();
+        Core.NewCols.UnregisterAllHendlers();
         InitializeUI();
     }
 
     public override void LoadContent()
     {
-        Core.Cols.RemoveAll();
+        Core.NewCols.RemoveAll();
         // Load the font for the standard text.
         _font = Core.Content.Load<SpriteFont>("fonts/04B_30");
 
@@ -227,7 +227,7 @@ public class TitleScene : Scene
         Core.Audio.PlaySoundEffect(_uiSoundEffect);
 
         // Change to the game scene to start the game.
-        Core.ChangeScene(new GameScene());
+        Core.ChangeScene(new TestScene());
     }
 
     private void HandleOptionsClicked(object sender, EventArgs e)
